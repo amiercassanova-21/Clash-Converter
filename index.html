@@ -230,144 +230,136 @@
   .mini{margin-top:8px}
   textarea{min-height:62px}
   pre{height:168px}
+
+
+  /* theme + language header toggles */
+  .htoggles{position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:3}
+  .htoggles button{width:30px;height:30px;border-radius:9px;background:rgba(0,0,0,.25);border:1px solid var(--line2);color:var(--gold-t);font-size:12px;font-weight:700}
+  /* edit overlay reuses qr-overlay */
+  .edit-box{background:var(--card); border:1px solid var(--line2); border-radius:18px; padding:16px; max-width:360px; width:100%;
+    box-shadow:0 0 26px rgba(201,161,60,.22), 0 12px 30px rgba(0,0,0,.8); max-height:88vh; overflow:auto}
+  .edit-box h3{margin:0 0 10px; font-size:14px; color:var(--gold-t); text-align:center}
+  .edit-box .lbl{margin-top:8px}
+  .edit-acts{display:flex; gap:10px; margin-top:14px}
+  /* drag */
+  .arow.drag{opacity:.4}
+  .arow .grip{cursor:grab; color:var(--tx3); flex:0 0 auto; padding:0 2px}
+  .arow .grip svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2}
+  /* light theme */
+  html[data-theme="light"]{ --bg:#eaeef4; --card:#ffffff; --sunk:#f1f4f9; --line:#d6dbe3; --line2:#b9c0cc;
+    --tx:#1b202a; --tx2:#4b5463; --tx3:#727b89; }
+  html[data-theme="light"] body{ background:
+    radial-gradient(620px 240px at 50% -30px, rgba(224,178,58,.18) 0%, transparent 72%),
+    radial-gradient(900px 520px at 50% 0, #ffffff 0%, transparent 70%), var(--bg); }
+  html[data-theme="light"] .card, html[data-theme="light"] .head-card{ background:#ffffff; box-shadow:0 0 0 1px rgba(201,161,60,.14), 0 6px 18px rgba(30,40,60,.12) }
+  html[data-theme="light"] .stat, html[data-theme="light"] details, html[data-theme="light"] .log{ background:#f5f7fb }
+  html[data-theme="light"] .pill, html[data-theme="light"] .act, html[data-theme="light"] .rbtn{ background:#eef1f6; color:var(--tx) }
+  html[data-theme="light"] pre{ color:#2a3340 }
+  html[data-theme="light"] .htoggles button{ background:#eef1f6 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <div class="card head-card">
+  <div class="htoggles"><button id="btnTheme" title="Tema">☀</button><button id="btnLang" title="Language">EN</button></div>
   <h1>CASSANOVA</h1>
   <div class="badge">CLASH META MULTI AKUN · MIHOMO</div>
 </div>
 
 <div class="card">
-
   <div class="rowhead">
-    <span>📝 LINK AKUN</span>
+    <span data-i18n="linkHead">📝 LINK AKUN</span>
     <div class="pills">
-      <button class="pill" id="btnPaste"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> Tempel</button>
-      <button class="pill" id="btnClear"><svg class="ic" style="color:var(--bad)" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V4h6v3"/></svg> Bersihkan</button>
+      <button class="pill" id="btnPaste"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> <span data-i18n="tPaste">Tempel</span></button>
+      <button class="pill" id="btnImport"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M4 14v6h16v-6M12 3v12M8 11l4 4 4-4"/></svg> <span data-i18n="tImport">Impor</span></button>
+      <button class="pill" id="btnClear"><svg class="ic" style="color:var(--bad)" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V4h6v3"/></svg> <span data-i18n="tClear">Bersihkan</span></button>
     </div>
   </div>
-  <textarea id="uri" spellcheck="false" placeholder="vless:// vmess:// trojan:// ss:// ssr:// hysteria2:// hysteria:// tuic:// anytls:// socks://&#10;&#10;Isi subscription Base64 atau tempel config Clash YAML juga bisa."></textarea>
+  <input type="file" id="fileIn" accept=".txt,.yaml,.yml,.conf,text/*" style="display:none">
+  <textarea id="uri" spellcheck="false" placeholder="vless:// vmess:// trojan:// ss:// ssr:// hysteria2:// hysteria:// tuic:// anytls:// socks://&#10;&#10;Isi subscription Base64 atau config Clash YAML juga bisa."></textarea>
   <div class="mini">
     <input type="text" id="subUrl" placeholder="https://… URL subscription (opsional)">
-    <button class="pill" id="btnUrl"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> Ambil</button>
+    <button class="pill" id="btnUrl"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> <span data-i18n="tFetch">Ambil</span></button>
   </div>
-  <p class="desc">Satu link per baris. Mendukung 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga (link keluar dari HP).</p>
+  <p class="desc" data-i18n="linkDesc">Satu link per baris. 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga.</p>
 
-  <div class="divider"><i></i><span>PENGATURAN</span><i></i></div>
+  <div class="divider"><i></i><span data-i18n="secSet">PENGATURAN</span><i></i></div>
 
   <div class="two">
-    <div class="fld"><div class="lbl">Perangkat tujuan</div>
-      <div class="sel-wrap"><select id="dev" class="active-sel">
-        <option value="hp" selected>HP (CMFA / FlClash / Verge)</option>
-        <option value="router">Router / PC (Mihomo core)</option>
-      </select></div><p class="desc" id="dDev"></p></div>
-    <div class="fld"><div class="lbl">Profil aturan</div>
-      <div class="sel-wrap"><select id="ruleset">
-        <option value="minimal" selected>Minimal</option>
-        <option value="full">Lengkap (geosite)</option>
-      </select></div><p class="desc" id="dRuleset"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lDev">Perangkat tujuan</div>
+      <div class="sel-wrap"><select id="dev" class="active-sel"><option value="hp" selected>HP (CMFA / FlClash / Verge)</option><option value="router">Router / PC (Mihomo)</option></select></div><p class="desc" id="dDev"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lRuleset">Profil aturan</div>
+      <div class="sel-wrap"><select id="ruleset"><option value="minimal" selected>Minimal</option><option value="full">Lengkap (geosite)</option></select></div><p class="desc" id="dRuleset"></p></div>
   </div>
-
   <div class="two">
-    <div class="fld"><div class="lbl">Keluaran</div>
-      <div class="sel-wrap"><select id="output">
-        <option value="config" selected>Config penuh</option>
-        <option value="provider">Proxy-provider (proxies saja)</option>
-      </select></div><p class="desc" id="dOutput"></p></div>
-    <div class="fld"><div class="lbl">Kecepatan cek server</div>
-      <div class="sel-wrap"><select id="spd">
-        <option value="fast">20 detik</option><option value="mid">1 menit</option><option value="slow" selected>5 menit</option>
-      </select></div><p class="desc" id="dSpd"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lOutput">Keluaran</div>
+      <div class="sel-wrap"><select id="output"><option value="config" selected>Config</option><option value="provider">Proxy-provider</option></select></div><p class="desc" id="dOutput"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lSpd">Kecepatan cek server</div>
+      <div class="sel-wrap"><select id="spd"><option value="fast">20s</option><option value="mid">1m</option><option value="slow" selected>5m</option></select></div><p class="desc" id="dSpd"></p></div>
   </div>
-
   <div class="two">
-    <div class="fld"><div class="lbl">Jumlah grup auto</div>
-      <div class="sel-wrap"><select id="grp">
-        <option value="1">1 grup</option><option value="2">2 grup</option><option value="3" selected>3 grup</option><option value="4">4 grup</option>
-      </select></div><p class="desc" id="dGrp"></p></div>
-    <div class="fld"><div class="lbl">Bendera bawaan</div>
-      <div class="sel-wrap"><select id="flag">
-        <option value="" selected>Tanpa bendera</option>
-        <option value="🇸🇬">🇸🇬 Singapura</option>
-        <option value="🇮🇩">🇮🇩 Indonesia</option>
-      </select></div><p class="desc" id="dFlag"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lGrp">Jumlah grup auto</div>
+      <div class="sel-wrap"><select id="grp"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></div><p class="desc" id="dGrp"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lFlag">Bendera bawaan</div>
+      <div class="sel-wrap"><select id="flag"><option value="" selected>Tanpa bendera</option><option value="🇸🇬">🇸🇬 Singapura</option><option value="🇮🇩">🇮🇩 Indonesia</option></select></div><p class="desc" id="dFlag"></p></div>
   </div>
-
-  <div class="fld">
-    <div class="lbl">Blokir QUIC</div>
-    <div class="sel-wrap"><select id="quic">
-      <option value="video" selected>Hanya aplikasi video — disarankan</option>
-      <option value="all">Semua UDP 443 — paling ketat</option>
-      <option value="off">Tidak diblokir</option>
-    </select></div>
-    <p class="desc" id="dQuic"></p>
-    <p class="warn" id="wQuic">Telepon WhatsApp bisa terganggu. Centang WhatsApp jalur langsung.</p>
+  <div class="two">
+    <div class="fld"><div class="lbl" data-i18n="lPorn">Konten porno</div>
+      <div class="sel-wrap"><select id="porn"><option value="off" selected>Biarkan</option><option value="reject">Blokir</option></select></div><p class="desc" id="dPorn"></p></div>
+    <div class="fld"><div class="lbl" data-i18n="lGames">Game</div>
+      <div class="sel-wrap"><select id="games"><option value="proxy" selected>Lewat tunnel</option><option value="direct">Direct</option><option value="off">Default</option></select></div><p class="desc" id="dGames"></p></div>
   </div>
+  <div class="fld"><div class="lbl" data-i18n="lQuic">Blokir QUIC</div>
+    <div class="sel-wrap"><select id="quic"><option value="video" selected>Hanya video</option><option value="all">Semua UDP 443</option><option value="off">Tidak</option></select></div>
+    <p class="desc" id="dQuic"></p><p class="warn" id="wQuic">Telepon WhatsApp bisa terganggu. Centang WhatsApp jalur langsung.</p></div>
 
-  <label class="chk"><input type="checkbox" id="oAdb" checked><span class="box">✓</span>
-    <span><b>Blokir iklan (AdBlock)</b><span class="desc" id="dAdb"></span></span></label>
-  <label class="chk"><input type="checkbox" id="oLb" checked><span class="box">✓</span>
-    <span><b>Bagi akun ke beberapa grup</b><span class="desc" id="dLb"></span></span></label>
-  <label class="chk"><input type="checkbox" id="oSplit" checked><span class="box">✓</span>
-    <span><b>Pisahkan grup per protokol</b><span class="desc" id="dSplit"></span></span></label>
-  <label class="chk"><input type="checkbox" id="oWa" checked><span class="box">✓</span>
-    <span><b>WhatsApp jalur langsung</b><span class="desc" id="dWa"></span></span></label>
-  <label class="chk"><input type="checkbox" id="oIns"><span class="box">✓</span>
-    <span><b>Lewati verifikasi sertifikat</b><span class="desc" id="dIns"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oAdb" checked><span class="box">✓</span><span><b data-i18n="cAdb">Blokir iklan (AdBlock)</b><span class="desc" id="dAdb"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oRegion"><span class="box">✓</span><span><b data-i18n="cRegion">Grup per region</b><span class="desc" id="dRegion"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oStream"><span class="box">✓</span><span><b data-i18n="cStream">Grup streaming (unlock)</b><span class="desc" id="dStream"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oLb" checked><span class="box">✓</span><span><b data-i18n="cLb">Bagi akun ke beberapa grup</b><span class="desc" id="dLb"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oSplit" checked><span class="box">✓</span><span><b data-i18n="cSplit">Pisahkan grup per protokol</b><span class="desc" id="dSplit"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oWa" checked><span class="box">✓</span><span><b data-i18n="cWa">WhatsApp jalur langsung</b><span class="desc" id="dWa"></span></span></label>
+  <label class="chk"><input type="checkbox" id="oIns"><span class="box">✓</span><span><b data-i18n="cIns">Lewati verifikasi sertifikat</b><span class="desc" id="dIns"></span></span></label>
 
   <details>
-    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg> Setelan lanjutan</summary>
+    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg> <span data-i18n="advSum">Setelan lanjutan</span></summary>
     <div class="two" style="margin-top:10px">
-      <div class="fld" style="margin-top:0"><div class="lbl">Fingerprint TLS (uTLS)</div>
-        <div class="sel-wrap"><select id="fpSel">
-          <option value="chrome" selected>chrome</option><option value="firefox">firefox</option>
-          <option value="safari">safari</option><option value="ios">ios</option>
-          <option value="randomized">randomized</option><option value="">matikan</option>
-        </select></div></div>
-      <div class="fld" style="margin-top:0"><div class="lbl">Tumpukan TUN</div>
-        <div class="sel-wrap"><select id="tunstack">
-          <option value="mixed" selected>mixed</option><option value="gvisor">gvisor</option><option value="system">system</option>
-        </select></div></div>
+      <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="lFp">Fingerprint TLS (uTLS)</div>
+        <div class="sel-wrap"><select id="fpSel"><option value="chrome" selected>chrome</option><option value="firefox">firefox</option><option value="safari">safari</option><option value="ios">ios</option><option value="randomized">randomized</option><option value="">off</option></select></div></div>
+      <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="lTun">Tumpukan TUN</div>
+        <div class="sel-wrap"><select id="tunstack"><option value="mixed" selected>mixed</option><option value="gvisor">gvisor</option><option value="system">system</option></select></div></div>
     </div>
     <div class="two">
-      <div class="fld"><div class="lbl">URL cek kecepatan</div>
-        <div class="sel-wrap"><select id="testurl">
-          <option value="gstatic" selected>gstatic 204</option><option value="cloudflare">cloudflare 204</option><option value="apple">apple 204</option>
-        </select></div></div>
-      <div class="fld"><div class="lbl">Strategi Load Balance</div>
-        <div class="sel-wrap"><select id="lbstrat">
-          <option value="consistent-hashing" selected>consistent-hashing</option><option value="round-robin">round-robin</option><option value="sticky-sessions">sticky-sessions</option>
-        </select></div></div>
+      <div class="fld"><div class="lbl" data-i18n="lDnsP">Penyedia DNS</div>
+        <div class="sel-wrap"><select id="dnsProvider"><option value="cloudflare" selected>Cloudflare</option><option value="google">Google</option><option value="adguard">AdGuard</option><option value="quad9">Quad9</option></select></div></div>
+      <div class="fld"><div class="lbl" data-i18n="lDnsProto">Protokol DNS</div>
+        <div class="sel-wrap"><select id="dnsProto"><option value="doh" selected>DoH</option><option value="dot">DoT</option><option value="doq">DoQ</option></select></div></div>
     </div>
     <div class="two">
-      <div class="fld"><div class="lbl">Port mixed</div><input type="text" id="port" value="7890" inputmode="numeric"></div>
-      <div class="fld"><div class="lbl">Secret controller</div><input type="text" id="secret" placeholder="kosong"></div>
+      <div class="fld"><div class="lbl" data-i18n="lTest">URL cek kecepatan</div>
+        <div class="sel-wrap"><select id="testurl"><option value="gstatic" selected>gstatic 204</option><option value="cloudflare">cloudflare 204</option><option value="apple">apple 204</option></select></div></div>
+      <div class="fld"><div class="lbl" data-i18n="lLbs">Strategi Load Balance</div>
+        <div class="sel-wrap"><select id="lbstrat"><option value="consistent-hashing" selected>consistent-hashing</option><option value="round-robin">round-robin</option><option value="sticky-sessions">sticky-sessions</option></select></div></div>
     </div>
-    <label class="chk"><input type="checkbox" id="oIpv6"><span class="box">✓</span>
-      <span><b>Aktifkan IPv6</b><span class="desc">Default mati agar tak bocor ke IPv6 lokal.</span></span></label>
+    <div class="two">
+      <div class="fld"><div class="lbl" data-i18n="lPort">Port mixed</div><input type="text" id="port" value="7890" inputmode="numeric"></div>
+      <div class="fld"><div class="lbl" data-i18n="lSecret">Secret controller</div><input type="text" id="secret" placeholder="kosong"></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="oDnsSplit"><span class="box">✓</span><span><b data-i18n="cDnsSplit">Split DNS (lokal ID direct)</b></span></label>
+    <label class="chk"><input type="checkbox" id="oGeo"><span class="box">✓</span><span><b data-i18n="cGeo">Auto-update geo database</b></span></label>
+    <label class="chk"><input type="checkbox" id="oIpv6"><span class="box">✓</span><span><b data-i18n="cIpv6">Aktifkan IPv6</b></span></label>
   </details>
 
-  <details>
-    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.5"/><path d="M12 17h.01"/></svg> Penjelasan tiap pilihan</summary>
-    <p><b>Grup.</b> Selalu ada 🚀 Proxy berisi ♻️ Best Ping, ⚖️ Load Balance, 🔁 Fallback, 🌐 Global, dan 🛑 AdBlock. Semua trafik lewat 🚀 Proxy.</p>
-    <p><b>Profil aturan.</b> Minimal = aturan ringkas (lokal .id direct, IP privat, QUIC). Lengkap = tambah rule-set geosite: iklan, privat, layanan lokal/bank/gov Indonesia, STUN, dan GEOIP ID → DIRECT. Lengkap mengunduh database geosite/geoip sekali.</p>
-    <p><b>Keluaran.</b> Config penuh untuk dipakai langsung; Proxy-provider menghasilkan blok proxies saja untuk digabung ke config milik Anda.</p>
-    <p><b>Fingerprint TLS.</b> Menyamarkan sidik jari TLS (uTLS) di semua node agar lebih tahan DPI. Bisa dimatikan.</p>
-    <p><b>AdBlock.</b> Aturan GEOSITE ads → grup 🛑 AdBlock (REJECT/DIRECT), bisa dimatikan per situs lewat dashboard.</p>
-    <p><b>Blokir QUIC.</b> QUIC = UDP 443 yang sering lolos tunnel. Mode video memakai aturan AND + sniffer; mode semua menutup seluruh UDP 443.</p>
-    <p><b>Lainnya.</b> Health-check hemat baterai (lazy), WhatsApp direct di atas aturan QUIC, pisah protokol agar node cepat tak selalu menang, skip-cert untuk IP bug.</p>
+  <details><summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.5"/><path d="M12 17h.01"/></svg> <span data-i18n="explSum">Penjelasan tiap pilihan</span></summary>
+    <div data-i18n-html="expl1"></div><div data-i18n-html="expl2"></div>
   </details>
 
-  <button class="go" id="btnGo">⚡ BUAT CONFIG CLASH</button>
-
+  <button class="go" id="btnGo" data-i18n="btnGo">⚡ BUAT CONFIG CLASH</button>
 </div>
 
 <div class="card">
-  <div class="divider"><i></i><span>✨ HASIL CONFIG</span><i></i></div>
-
+  <div class="divider"><i></i><span data-i18n="secRes">✨ HASIL CONFIG</span><i></i></div>
   <div class="stats">
     <div class="stat"><span>Total</span><b id="sAll">0</b></div>
     <div class="stat"><span>VLESS</span><b id="sV">0</b></div>
@@ -380,51 +372,49 @@
   </div>
 
   <div class="list" id="list">
-    <p class="listhead">Hapus centang untuk membuang akun. Ganti nama lalu Buat ulang. Tombol: QR, salin link, naik/turun.</p>
+    <div class="divider"><i></i><span data-i18n="secBug">GANTI BUG HOST / SNI (MASSAL)</span><i></i></div>
+    <div class="mini"><input type="text" id="bugServer" placeholder="server / bug host baru"><button class="pill" id="bugApply" data-i18n="tApply">Terapkan</button></div>
+    <div class="mini"><input type="text" id="sniVal" placeholder="SNI baru"><input type="text" id="hostVal" placeholder="Host baru"><button class="pill" id="sniApply" data-i18n="tApply">Terapkan</button></div>
+    <p class="listhead" data-i18n="listHead" style="margin-top:10px">Hapus centang untuk membuang akun. Tombol: edit, QR, salin link, geser urutan.</p>
     <div class="bulk">
-      <div class="sel-wrap"><select id="flagBulk">
-        <option value="">Bendera massal…</option>
-        <option value="🇸🇬">🇸🇬 Singapura</option>
-        <option value="🇮🇩">🇮🇩 Indonesia</option>
-        <option value="🇲🇾">🇲🇾 Malaysia</option>
-        <option value="🇯🇵">🇯🇵 Jepang</option>
-        <option value="__none__">Hapus bendera</option>
-      </select></div>
-      <button class="pill" id="btnBulkFlag">Terapkan</button>
+      <div class="sel-wrap"><select id="flagBulk"><option value="">Bendera massal…</option><option value="🇸🇬">🇸🇬 Singapura</option><option value="🇮🇩">🇮🇩 Indonesia</option><option value="🇲🇾">🇲🇾 Malaysia</option><option value="🇯🇵">🇯🇵 Jepang</option><option value="__none__">Hapus bendera</option></select></div>
+      <button class="pill" id="btnBulkFlag" data-i18n="tApply">Terapkan</button>
     </div>
     <div id="rows"></div>
-    <button class="act" id="btnRegen" style="width:100%; margin-top:4px"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg> Buat ulang dari daftar</button>
+    <button class="act" id="btnRegen" style="width:100%; margin-top:4px"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg> <span data-i18n="tRegen">Buat ulang dari daftar</span></button>
   </div>
 
   <pre id="out" class="empty">Tempel link akun di atas, lalu tekan tombol emas.</pre>
-
   <div class="acts">
-    <button class="act" id="btnCopy"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Salin</button>
-    <button class="act" id="btnDl"><svg class="ic" style="color:var(--ok)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> Unduh</button>
+    <button class="act" id="btnCopy"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> <span data-i18n="tCopy">Salin</span></button>
+    <button class="act" id="btnDl"><svg class="ic" style="color:var(--ok)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> <span data-i18n="tDl">Unduh</span></button>
   </div>
-
   <div class="log" id="log"></div>
-  <div class="privacy">Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali fitur Ambil-dari-URL).</div>
-  <div class="ver">CASSANOVA Clash v3.0 · 10 protokol · ingest YAML · QR · PWA</div>
-
-  <div class="credit-wrap"><div class="credit">
-    <span>by: amiercassanova</span><i class="sep"></i>
+  <div class="privacy" data-i18n="privacy">Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali Ambil-dari-URL).</div>
+  <div class="ver">CASSANOVA Clash v4.0 · 10 protokol · region/streaming · edit node · QR · EN/ID · tema</div>
+  <div class="credit-wrap"><div class="credit"><span>by: amiercassanova</span><i class="sep"></i>
     <a class="cbtn" href="https://t.me/kang_rebahan" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.5 4.3 2.9 11.4c-.9.3-.9 1.6.1 1.9l4.6 1.4 1.8 5.4c.3.8 1.3 1 1.9.4l2.5-2.4 4.6 3.4c.7.5 1.7.1 1.9-.7l3.2-14.4c.2-.9-.7-1.6-1.5-1.3z"/></svg></a>
     <a class="cbtn" href="https://wa.link/3yhb8f" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.8 1.2-.5 0-1 .2-3.4-.8-2.9-1.2-4.7-4.2-4.8-4.4-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.6-.1l.8-1c.2-.2.3-.2.6-.1l2 .9c.2.1.4.2.4.4v.4z"/></svg></a>
   </div></div>
   <div class="foot">© 2026 By: Amier Cassanova</div>
 </div></div>
 
-<div class="qr-overlay" id="qrOverlay"><div class="qr-box">
-  <div id="qrImg"></div>
-  <div class="qname" id="qrName"></div>
-  <div class="qraw" id="qrRaw"></div>
-  <button class="act qclose" id="qrClose">Tutup</button>
+<div class="qr-overlay" id="qrOverlay"><div class="qr-box"><div id="qrImg"></div><div class="qname" id="qrName"></div><div class="qraw" id="qrRaw"></div><button class="act qclose" id="qrClose" data-i18n="qrClose">Tutup</button></div></div>
+
+<div class="qr-overlay" id="editOverlay"><div class="edit-box">
+  <h3 data-i18n="edTitle">Edit Node</h3>
+  <div class="lbl" data-i18n="edName">Nama</div><input type="text" id="edName">
+  <div class="lbl" data-i18n="edServer">Server / Bug</div><input type="text" id="edServer">
+  <div class="two"><div class="fld" style="margin-top:0"><div class="lbl" data-i18n="edPort">Port</div><input type="text" id="edPort" inputmode="numeric"></div>
+    <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="edSni">SNI</div><input type="text" id="edSni"></div></div>
+  <div class="lbl" data-i18n="edHost">Host</div><input type="text" id="edHost">
+  <div class="lbl" data-i18n="edCred">UUID / Password</div><input type="text" id="edCred">
+  <div class="edit-acts"><button class="act" id="edCancel" data-i18n="edCancel">Batal</button><button class="go" id="edSave" style="margin-top:0" data-i18n="edSave">Simpan</button></div>
 </div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== QR encoder ===== */
 /* Compact QR encoder — byte mode, versions 1..20, ECC level L. Returns {size, matrix[][]bool}. */
 (function(root){
   // GF(256)
@@ -565,7 +555,6 @@
   (root||this).QR={ encode };
 })(typeof window!=="undefined"?window:this);
 
-/* ===== engine (identical to tested engine3.js) ===== */
 /* ===== CASSANOVA Clash engine v3 =====
    protocols: vless vmess trojan ss ssr hysteria2 hysteria tuic anytls socks (+ Clash-YAML ingest)
    features: uTLS fingerprint, lazy/expected-status, always-on sniffer, rule profiles,
@@ -920,8 +909,14 @@ function expand(text){
 }
 
 const FLAGS=[["🇸🇬",["singapore","singapura","sgp","sin","sg"]],["🇮🇩",["indonesia","jakarta","surabaya","jkt","sby","idn"]],
-  ["🇲🇾",["malaysia","kuala","kul","myr"]],["🇯🇵",["tokyo","japan","jpn"]],["🇺🇸",["america","usa"]],
-  ["🇭🇰",["hongkong","hkg"]],["🇩🇪",["germany","frankfurt","ger"]]];
+  ["🇲🇾",["malaysia","kuala","kul","myr"]],["🇯🇵",["tokyo","japan","jpn","jp"]],["🇺🇸",["america","united states","usa","us"]],
+  ["🇭🇰",["hongkong","hong kong","hkg","hk"]],["🇩🇪",["germany","frankfurt","ger","de"]],
+  ["🇹🇭",["thailand","bangkok","tha","th"]],["🇻🇳",["vietnam","hanoi","vnm","vn"]],["🇰🇷",["korea","seoul","kor","kr"]],
+  ["🇬🇧",["united kingdom","england","london","gbr","uk","gb"]],["🇮🇳",["india","mumbai","ind","in"]],
+  ["🇳🇱",["netherlands","amsterdam","nld","nl"]],["🇹🇼",["taiwan","taipei","twn","tw"]],["🇵🇭",["philippines","manila","phl","ph"]],
+  ["🇦🇺",["australia","sydney","aus","au"]],["🇨🇳",["china","shanghai","beijing","chn","cn"]],
+  ["🇫🇷",["france","paris","fra","fr"]],["🇨🇦",["canada","toronto","can","ca"]],["🇷🇺",["russia","moscow","rus","ru"]],
+  ["🇦🇪",["dubai","emirates","uae","ae"]],["🇧🇷",["brazil","brasil","bra","br"]],["🇹🇷",["turkey","istanbul","tur","tr"]]];
 function detectFlag(a, fallback){
   const has=/[\u{1F1E6}-\u{1F1FF}]{2}/u.exec(a.remark||"");
   if(has) return has[0];
@@ -1080,7 +1075,28 @@ const TESTURL={ gstatic:"http://www.gstatic.com/generate_204", cloudflare:"https
   apple:"http://captive.apple.com/generate_204" };
 const DEV={ hp:{ ctrl:"127.0.0.1:9090", lan:false, bind:"*" }, router:{ ctrl:"0.0.0.0:9090", lan:true, bind:"*" } };
 const G={ PROXY:"🚀 Proxy", BEST:"♻️ Best Ping", LB:"⚖️ Load Balance", FB:"🔁 Fallback",
-  GLOBAL:"🌐 Global", ADB:"🛑 AdBlock" };
+  GLOBAL:"🌐 Global", ADB:"🛑 AdBlock", STREAM:"🎬 Streaming" };
+const REGIONLBL={"🇸🇬":"Singapura","🇮🇩":"Indonesia","🇲🇾":"Malaysia","🇯🇵":"Jepang","🇺🇸":"Amerika","🇭🇰":"Hong Kong",
+  "🇩🇪":"Jerman","🇹🇭":"Thailand","🇻🇳":"Vietnam","🇰🇷":"Korea","🇬🇧":"Inggris","🇮🇳":"India","🇳🇱":"Belanda",
+  "🇹🇼":"Taiwan","🇵🇭":"Filipina","🇦🇺":"Australia","🇨🇳":"China","🇫🇷":"Prancis","🇨🇦":"Kanada","🇷🇺":"Rusia",
+  "🇦🇪":"Dubai","🇧🇷":"Brasil","🇹🇷":"Turki"};
+const STREAM_SITE=["netflix","disney","youtube","primevideo","hbo","spotify","bahamut","hulu"];
+const DNSP={ cloudflare:{doh:"https://1.1.1.1/dns-query",dot:"tls://1.1.1.1",doq:"quic://1.1.1.1"},
+  google:{doh:"https://8.8.8.8/dns-query",dot:"tls://8.8.8.8",doq:"https://8.8.8.8/dns-query"},
+  adguard:{doh:"https://dns.adguard-dns.com/dns-query",dot:"tls://dns.adguard-dns.com",doq:"quic://dns.adguard-dns.com"},
+  quad9:{doh:"https://9.9.9.9/dns-query",dot:"tls://9.9.9.9",doq:"https://9.9.9.9/dns-query"} };
+
+/* mutate an account in place (mass bug-host / SNI / per-node edit); handles YAML-ingested nodes too */
+function applyToAccount(a, p){
+  if(p.server!=null && p.server!==""){ a.server=p.server; if(a._clash) a._clash.server=p.server; }
+  if(p.port!=null && p.port!==""){ a.port=parseInt(p.port,10)||a.port; if(a._clash) a._clash.port=a.port; }
+  if(p.sni!=null && p.sni!==""){ a.sni=p.sni;
+    if(a._clash){ if(["trojan","hysteria2","hysteria","tuic","anytls"].includes(a.proto)) a._clash.sni=p.sni; else a._clash.servername=p.sni; } }
+  if(p.host!=null && p.host!==""){ a.host=p.host;
+    if(a._clash && a._clash["ws-opts"] && a._clash["ws-opts"].headers) a._clash["ws-opts"].headers.Host=p.host; }
+  if(p.cred!=null && p.cred!==""){ a.cred=p.cred; if(a.proto==="vless"||a.proto==="vmess") a.uuid=p.cred;
+    if(a._clash){ if("uuid" in a._clash) a._clash.uuid=p.cred; if("password" in a._clash) a._clash.password=p.cred; } }
+}
 
 function build(accs, o, override){
   o=o||{};
@@ -1129,7 +1145,16 @@ function build(accs, o, override){
     parts.forEach((g,i)=>{ if(g.length){ const nm=GNAME[i]||("🎯 Grup "+(i+1)); groups.push(urltest(nm,g)); nNames.push(nm); } });
   }
 
-  const proxyMembers=[G.BEST,G.LB,G.FB,G.GLOBAL].concat(splitNames,nNames,["DIRECT"]);
+  const regionNames=[];
+  if(o.region){
+    const byFlag={};
+    accs.forEach((a,i)=>{ const f=detectFlag(a,o.flag)||"🏳️"; (byFlag[f]=byFlag[f]||[]).push(names[i]); });
+    Object.keys(byFlag).forEach(f=>{ const nm=f+" "+(REGIONLBL[f]||"Region"); groups.push(urltest(nm,byFlag[f])); regionNames.push(nm); });
+  }
+  let streamName=null;
+  if(o.streaming){ streamName=G.STREAM; groups.push({ name:G.STREAM, type:"select", proxies:[G.BEST].concat(names,["DIRECT"]) }); }
+
+  const proxyMembers=[G.BEST,G.LB,G.FB,G.GLOBAL].concat(regionNames,splitNames,nNames,(streamName?[streamName]:[]),["DIRECT"]);
   const proxySel={ name:G.PROXY, type:"select", proxies:proxyMembers };
   if(o.adblock) groups.push({ name:G.ADB, type:"select", proxies:["REJECT","DIRECT"] });
 
@@ -1149,11 +1174,18 @@ function build(accs, o, override){
   }
   rules.push("DOMAIN-SUFFIX,id,DIRECT");
   if(o.adblock) rules.push("GEOSITE,category-ads-all,"+G.ADB);
+  if(o.catPorn==="reject") rules.push("GEOSITE,category-porn,REJECT");
+  if(o.streaming) STREAM_SITE.forEach(s=>rules.push("GEOSITE,"+s+","+G.STREAM));
+  if(o.catGames==="direct") rules.push("GEOSITE,category-games,DIRECT");
+  else if(o.catGames==="proxy") rules.push("GEOSITE,category-games,"+G.PROXY);
   if(ruleFull) rules.push("GEOIP,ID,DIRECT");
   if(o.quic==="video") QDOM.forEach(d=>rules.push("AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,"+d+")),REJECT"));
   if(o.quic==="all") rules.push("AND,((NETWORK,udp),(DST-PORT,443)),REJECT");
   rules.push("MATCH,"+G.PROXY);
 
+  const prov=DNSP[o.dnsProvider]||DNSP.cloudflare;
+  const proto=["doh","dot","doq"].includes(o.dnsProto)?o.dnsProto:"doh";
+  const remoteNS=prov[proto]||prov.doh;
   const dns={
     enable:true, listen:"0.0.0.0:1053", ipv6:ipv6,
     "enhanced-mode":"fake-ip", "fake-ip-range":"198.18.0.1/16",
@@ -1161,10 +1193,10 @@ function build(accs, o, override){
       "time.*.com","time.*.gov","+.pool.ntp.org","+.push.apple.com","+.wns.windows.com","stun.*.*","stun.*.*.*"],
     "respect-rules":true,
     "default-nameserver":["8.8.8.8","1.1.1.1"],
-    nameserver:["https://1.1.1.1/dns-query","https://8.8.8.8/dns-query"],
-    "proxy-server-nameserver":["https://1.1.1.1/dns-query"]
+    nameserver:[remoteNS,"https://8.8.8.8/dns-query"],
+    "proxy-server-nameserver":[remoteNS]
   };
-  if(ruleFull) dns["nameserver-policy"]={ "geosite:private":"system", "+.id":["https://1.1.1.1/dns-query"] };
+  if(ruleFull || o.dnsSplit) dns["nameserver-policy"]={ "geosite:private":"system", "+.id":["system"] };
 
   const cfg={
     "mixed-port":port,
@@ -1176,6 +1208,8 @@ function build(accs, o, override){
     "external-controller":dev.ctrl,
     secret:secret,
     "global-client-fingerprint": gfp||undefined,
+    "geo-auto-update": o.geoUpdate?true:undefined,
+    "geo-update-interval": o.geoUpdate?24:undefined,
     profile:{ "store-selected":true, "store-fake-ip":true },
     sniffer:{ enable:true, "force-dns-mapping":true, "parse-pure-ip":true, "override-destination":false,
       sniff:{ HTTP:{ports:[80,8080]}, TLS:{ports:[443,8443]}, QUIC:{ports:[443]} },
@@ -1229,107 +1263,178 @@ function emitOutput(cfg, o){
   if(o && o.output==="provider") return yamlDump({ proxies:cfg.proxies });
   return yamlDump(cfg);
 }
-/* ===== DOM glue ===== */
 
 const $ = i => document.getElementById(i);
-let OUT="", FNAME="config-clash.yaml";
+let OUT="", FNAME="config-clash.yaml", LANG="id";
 
-const D={
-  dev:{ hp:"Controller 127.0.0.1:9090, allow-lan mati.", router:"Controller 0.0.0.0:9090, allow-lan nyala." },
-  ruleset:{ minimal:"Aturan ringkas (lokal .id, IP privat, QUIC).", full:"Tambah geosite: iklan, privat, lokal/bank/gov ID, STUN, GEOIP ID direct (unduh database sekali)." },
-  output:{ config:"Config Clash siap pakai.", provider:"Hanya blok proxies, untuk digabung ke config sendiri." },
-  grp:{ "1":"Tanpa grup tambahan.", "2":"Akun dibagi dua grup.", "3":"Primary/Backup/Tertiary.", "4":"Dibagi empat grup." },
-  spd:{ fast:"Cepat pindah; boros baterai.", mid:"Seimbang.", slow:"Hemat baterai, cocok banyak akun." },
-  quic:{ video:"Video (YouTube/TikTok/IG) dipaksa lewat tunnel; lainnya bebas.", all:"Semua UDP 443 ditutup; paling hemat kuota.", off:"Tidak diblokir." },
-  flag:{ "":"Dibiarkan polos.", "\u{1F1F8}\u{1F1EC}":"Dianggap Singapura.", "\u{1F1EE}\u{1F1E9}":"Dianggap Indonesia." },
-  adb:{ on:"Iklan diblokir; bisa dimatikan per situs.", off:"Tidak memblokir iklan." },
-  lb:{ on:"Disebar ke Primary/Backup/Tertiary.", off:"Hanya lima grup utama." },
-  split:{ on:"Tiap protokol punya grup auto sendiri.", off:"Semua protokol dicampur." },
-  wa:{ on:"WhatsApp direct, chat & telepon lancar.", off:"WhatsApp ikut tunnel." },
-  ins:{ on:"Jalan walau sertifikat tak cocok.", off:"Sertifikat diperiksa ketat." }
+/* ---------- i18n ---------- */
+const T={
+  linkHead:{id:"\u{1F4DD} LINK AKUN",en:"\u{1F4DD} ACCOUNT LINKS"},
+  tPaste:{id:"Tempel",en:"Paste"}, tClear:{id:"Bersihkan",en:"Clear"}, tImport:{id:"Impor",en:"Import"}, tFetch:{id:"Ambil",en:"Fetch"},
+  linkDesc:{id:"Satu link per baris. 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga.",en:"One link per line. 10 protocols + Clash YAML ingest. Fetch-from-URL uses a third-party proxy."},
+  secSet:{id:"PENGATURAN",en:"SETTINGS"}, secRes:{id:"✨ HASIL CONFIG",en:"✨ RESULT"},
+  lDev:{id:"Perangkat tujuan",en:"Target device"}, lRuleset:{id:"Profil aturan",en:"Rule profile"},
+  lOutput:{id:"Keluaran",en:"Output"}, lSpd:{id:"Kecepatan cek server",en:"Health-check speed"},
+  lGrp:{id:"Jumlah grup auto",en:"Auto group count"}, lFlag:{id:"Bendera bawaan",en:"Default flag"},
+  lQuic:{id:"Blokir QUIC",en:"Block QUIC"}, lPorn:{id:"Konten porno",en:"Porn content"}, lGames:{id:"Game",en:"Games"},
+  cAdb:{id:"Blokir iklan (AdBlock)",en:"Block ads (AdBlock)"}, cRegion:{id:"Grup per region",en:"Per-region groups"},
+  cStream:{id:"Grup streaming (unlock)",en:"Streaming group (unlock)"}, cLb:{id:"Bagi akun ke beberapa grup",en:"Split accounts into groups"},
+  cSplit:{id:"Pisahkan grup per protokol",en:"Separate groups per protocol"}, cWa:{id:"WhatsApp jalur langsung",en:"WhatsApp direct"},
+  cIns:{id:"Lewati verifikasi sertifikat",en:"Skip cert verify"}, cIpv6:{id:"Aktifkan IPv6",en:"Enable IPv6"},
+  advSum:{id:"Setelan lanjutan",en:"Advanced settings"}, explSum:{id:"Penjelasan tiap pilihan",en:"Explanation of each option"},
+  lFp:{id:"Fingerprint TLS (uTLS)",en:"TLS fingerprint (uTLS)"}, lTun:{id:"Tumpukan TUN",en:"TUN stack"},
+  lTest:{id:"URL cek kecepatan",en:"Health-check URL"}, lLbs:{id:"Strategi Load Balance",en:"Load Balance strategy"},
+  lDnsP:{id:"Penyedia DNS",en:"DNS provider"}, lDnsProto:{id:"Protokol DNS",en:"DNS protocol"},
+  lPort:{id:"Port mixed",en:"Mixed port"}, lSecret:{id:"Secret controller",en:"Controller secret"},
+  cDnsSplit:{id:"Split DNS (lokal ID direct)",en:"Split DNS (local ID direct)"}, cGeo:{id:"Auto-update geo database",en:"Auto-update geo database"},
+  btnGo:{id:"⚡ BUAT CONFIG CLASH",en:"⚡ BUILD CLASH CONFIG"},
+  listHead:{id:"Hapus centang untuk membuang akun. Tombol: edit, QR, salin link, geser urutan.",en:"Uncheck to drop an account. Buttons: edit, QR, copy link, reorder."},
+  secBug:{id:"GANTI BUG HOST / SNI (MASSAL)",en:"REPLACE BUG HOST / SNI (BULK)"},
+  tApply:{id:"Terapkan",en:"Apply"}, tRegen:{id:"Buat ulang dari daftar",en:"Rebuild from list"},
+  tCopy:{id:"Salin",en:"Copy"}, tDl:{id:"Unduh",en:"Download"},
+  privacy:{id:"Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali Ambil-dari-URL).",en:"Everything runs on this device. Links are never sent anywhere (except Fetch-from-URL)."},
+  edTitle:{id:"Edit Node",en:"Edit Node"}, edName:{id:"Nama",en:"Name"}, edServer:{id:"Server / Bug",en:"Server / Bug"},
+  edPort:{id:"Port",en:"Port"}, edSni:{id:"SNI",en:"SNI"}, edHost:{id:"Host",en:"Host"}, edCred:{id:"UUID / Password",en:"UUID / Password"},
+  edSave:{id:"Simpan",en:"Save"}, edCancel:{id:"Batal",en:"Cancel"}, qrClose:{id:"Tutup",en:"Close"},
+  expl1:{id:"<p><b>Grup.</b> Selalu ada \u{1F680} Proxy berisi ♻️ Best Ping, ⚖️ Load Balance, \u{1F501} Fallback, \u{1F310} Global, \u{1F6D1} AdBlock, plus grup region & \u{1F3AC} Streaming bila diaktifkan.</p><p><b>Profil aturan.</b> Minimal = ringkas; Lengkap = tambah geosite (iklan, privat, lokal/bank/gov ID, STUN, GEOIP ID) — unduh database sekali.</p><p><b>Deteksi bendera.</b> Otomatis dari nama/host (sg, jkt, tokyo, dll). ‘Tanpa bendera’ hanya untuk node yang tak terdeteksi.</p><p><b>Ganti bug host / SNI.</b> Ubah alamat server (bug) atau SNI & Host untuk semua node sekaligus; atau edit satu node lewat tombol edit.</p>",
+        en:"<p><b>Groups.</b> Always a \u{1F680} Proxy holding ♻️ Best Ping, ⚖️ Load Balance, \u{1F501} Fallback, \u{1F310} Global, \u{1F6D1} AdBlock, plus region & \u{1F3AC} Streaming groups when enabled.</p><p><b>Rule profile.</b> Minimal = lean; Full = adds geosite (ads, private, local/bank/gov ID, STUN, GEOIP ID) — downloads geo databases once.</p><p><b>Flag detection.</b> Automatic from name/host (sg, jkt, tokyo, ...). ‘No flag’ only applies to nodes that can’t be detected.</p><p><b>Replace bug host / SNI.</b> Change server (bug) or SNI & Host for all nodes at once; or edit a single node via its edit button.</p>"},
+  expl2:{id:"<p><b>Fingerprint TLS.</b> Menyamarkan sidik jari TLS (uTLS) di semua node, lebih tahan DPI.</p><p><b>AdBlock.</b> GEOSITE ads → grup \u{1F6D1} AdBlock (REJECT/DIRECT), bisa dimatikan per situs.</p><p><b>DNS.</b> Pilih penyedia (Cloudflare/Google/AdGuard/Quad9) & protokol (DoH/DoT/DoQ). Split DNS mengarahkan domain lokal ID ke DNS sistem.</p><p><b>Blokir QUIC.</b> Mode video pakai aturan AND + sniffer; mode semua menutup seluruh UDP 443.</p>",
+        en:"<p><b>TLS fingerprint.</b> Masks the TLS fingerprint (uTLS) on all nodes, more DPI-resistant.</p><p><b>AdBlock.</b> GEOSITE ads → \u{1F6D1} AdBlock group (REJECT/DIRECT), toggleable per site.</p><p><b>DNS.</b> Pick a provider (Cloudflare/Google/AdGuard/Quad9) & protocol (DoH/DoT/DoQ). Split DNS sends local ID domains to the system DNS.</p><p><b>Block QUIC.</b> Video mode uses AND rules + sniffer; all mode blocks all UDP 443.</p>"}
 };
+const D={
+  id:{ dev:{hp:"Controller 127.0.0.1:9090, allow-lan mati.",router:"Controller 0.0.0.0:9090, allow-lan nyala."},
+    ruleset:{minimal:"Aturan ringkas.",full:"Tambah geosite (iklan, privat, lokal/bank/gov ID, STUN, GEOIP ID) — unduh database sekali."},
+    output:{config:"Config Clash siap pakai.",provider:"Hanya blok proxies."},
+    grp:{"1":"Tanpa grup tambahan.","2":"Dibagi dua grup.","3":"Primary/Backup/Tertiary.","4":"Dibagi empat grup."},
+    spd:{fast:"Cepat pindah; boros baterai.",mid:"Seimbang.",slow:"Hemat baterai, cocok banyak akun."},
+    quic:{video:"Video dipaksa lewat tunnel; lainnya bebas.",all:"Semua UDP 443 ditutup.",off:"Tidak diblokir."},
+    flag:{"":"Bendera dideteksi otomatis dari nama/host. Pilihan ini hanya untuk node yang tak terdeteksi (dibiarkan polos).","\u{1F1F8}\u{1F1EC}":"Node tak terdeteksi dianggap Singapura.","\u{1F1EE}\u{1F1E9}":"Node tak terdeteksi dianggap Indonesia."},
+    porn:{off:"Dibiarkan.",reject:"Diblokir (geosite porn → REJECT)."}, games:{proxy:"Lewat tunnel.",direct:"Langsung tanpa tunnel.",off:"Ikut aturan umum."},
+    adb:{on:"Iklan diblokir; bisa dimatikan per situs.",off:"Tidak memblokir iklan."},
+    region:{on:"Grup url-test per region otomatis dari bendera.",off:"Tanpa grup region."},
+    stream:{on:"Grup \u{1F3AC} Streaming + aturan Netflix/Disney/YouTube dll.",off:"Tanpa grup streaming."},
+    lb:{on:"Disebar ke Primary/Backup/Tertiary.",off:"Hanya grup utama."},
+    split:{on:"Tiap protokol punya grup auto sendiri.",off:"Dicampur."},
+    wa:{on:"WhatsApp direct.",off:"WhatsApp ikut tunnel."}, ins:{on:"Jalan walau sertifikat tak cocok.",off:"Sertifikat diperiksa ketat."} },
+  en:{ dev:{hp:"Controller 127.0.0.1:9090, allow-lan off.",router:"Controller 0.0.0.0:9090, allow-lan on."},
+    ruleset:{minimal:"Lean rules.",full:"Adds geosite (ads, private, local/bank/gov ID, STUN, GEOIP ID) — downloads once."},
+    output:{config:"Ready-to-use Clash config.",provider:"Proxies block only."},
+    grp:{"1":"No extra groups.","2":"Split into two.","3":"Primary/Backup/Tertiary.","4":"Split into four."},
+    spd:{fast:"Switches fast; battery-hungry.",mid:"Balanced.",slow:"Battery-friendly, good for many accounts."},
+    quic:{video:"Video forced through tunnel; others free.",all:"All UDP 443 blocked.",off:"Not blocked."},
+    flag:{"":"Flags are auto-detected from name/host. This only applies to undetected nodes (left plain).","\u{1F1F8}\u{1F1EC}":"Undetected nodes treated as Singapore.","\u{1F1EE}\u{1F1E9}":"Undetected nodes treated as Indonesia."},
+    porn:{off:"Allowed.",reject:"Blocked (geosite porn → REJECT)."}, games:{proxy:"Through tunnel.",direct:"Direct, no tunnel.",off:"Follows general rules."},
+    adb:{on:"Ads blocked; toggleable per site.",off:"Ads not blocked."},
+    region:{on:"Auto url-test group per region from flags.",off:"No region groups."},
+    stream:{on:"\u{1F3AC} Streaming group + Netflix/Disney/YouTube rules.",off:"No streaming group."},
+    lb:{on:"Spread across Primary/Backup/Tertiary.",off:"Main groups only."},
+    split:{on:"Each protocol gets its own auto group.",off:"Mixed."},
+    wa:{on:"WhatsApp direct.",off:"WhatsApp via tunnel."}, ins:{on:"Works even if cert mismatches.",off:"Cert checked strictly."} }
+};
+function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch(e){}
+  document.querySelectorAll("[data-i18n]").forEach(e=>{ const k=e.getAttribute("data-i18n"); if(T[k]) e.textContent=T[k][l]; });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e=>{ const k=e.getAttribute("data-i18n-ph"); if(T[k]) e.setAttribute("placeholder",T[k][l]); });
+  document.querySelectorAll("[data-i18n-html]").forEach(e=>{ const k=e.getAttribute("data-i18n-html"); if(T[k]) e.innerHTML=T[k][l]; });
+  $("btnLang").textContent = l==="id"?"EN":"ID";
+  sync();
+}
+
 function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","fpSel","tunstack","testurl","lbstrat","port","secret"];
-const SET_CHK=["oAdb","oLb","oSplit","oWa","oIns","oIpv6"];
+const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","porn","games","fpSel","tunstack","testurl","lbstrat","dnsProvider","dnsProto","port","secret"];
+const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oWa","oIns","oIpv6","oDnsSplit","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
-function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null) $(i).value=s[i]; });
-  SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean") $(i).checked=s[i]; }); }
-const LAST="cassanova_clash_v3_last";
+function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
+const LAST="cassanova_clash_v4_last";
 function saveLast(){ try{ localStorage.setItem(LAST, JSON.stringify(settings())); }catch(e){} }
 function loadLast(){ try{ applySettings(JSON.parse(localStorage.getItem(LAST)||"null")); }catch(e){} }
 
-function sync(){
-  $("dDev").textContent=D.dev[$("dev").value]; $("dRuleset").textContent=D.ruleset[$("ruleset").value];
-  $("dOutput").textContent=D.output[$("output").value]; $("dGrp").textContent=D.grp[$("grp").value];
-  $("dSpd").textContent=D.spd[$("spd").value]; $("dQuic").textContent=D.quic[$("quic").value];
-  $("dFlag").textContent=D.flag[$("flag").value];
-  $("dAdb").textContent=$("oAdb").checked?D.adb.on:D.adb.off;
-  $("dLb").textContent=$("oLb").checked?D.lb.on:D.lb.off;
-  $("dSplit").textContent=$("oSplit").checked?D.split.on:D.split.off;
-  $("dWa").textContent=$("oWa").checked?D.wa.on:D.wa.off;
-  $("dIns").textContent=$("oIns").checked?D.ins.on:D.ins.off;
+function sync(){ const g=D[LANG];
+  $("dDev").textContent=g.dev[$("dev").value]; $("dRuleset").textContent=g.ruleset[$("ruleset").value];
+  $("dOutput").textContent=g.output[$("output").value]; $("dGrp").textContent=g.grp[$("grp").value];
+  $("dSpd").textContent=g.spd[$("spd").value]; $("dQuic").textContent=g.quic[$("quic").value];
+  $("dFlag").textContent=g.flag[$("flag").value]; $("dPorn").textContent=g.porn[$("porn").value]; $("dGames").textContent=g.games[$("games").value];
+  $("dAdb").textContent=$("oAdb").checked?g.adb.on:g.adb.off; $("dRegion").textContent=$("oRegion").checked?g.region.on:g.region.off;
+  $("dStream").textContent=$("oStream").checked?g.stream.on:g.stream.off;
+  $("dLb").textContent=$("oLb").checked?g.lb.on:g.lb.off; $("dSplit").textContent=$("oSplit").checked?g.split.on:g.split.off;
+  $("dWa").textContent=$("oWa").checked?g.wa.on:g.wa.off; $("dIns").textContent=$("oIns").checked?g.ins.on:g.ins.off;
   $("wQuic").classList.toggle("on", $("quic").value==="all" && !$("oWa").checked);
   saveLast();
 }
-SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); e.addEventListener("change",sync); e.addEventListener("input",sync); });
+SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); if(e){ e.addEventListener("change",sync); e.addEventListener("input",sync); } });
 
 let ACCS=[], ROWS=[];
 function readOpt(){ const s=settings();
   return { dev:s.dev, ruleset:s.ruleset, output:s.output, spd:s.spd, grp:parseInt(s.grp,10), flag:s.flag, quic:s.quic,
-    adblock:s.oAdb, lb:s.oLb, split:s.oSplit, wa:s.oWa, ins:s.oIns,
-    fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret, testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack }; }
+    adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games,
+    lb:s.oLb, split:s.oSplit, wa:s.oWa, ins:s.oIns, fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
+    testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack,
+    dnsProvider:s.dnsProvider, dnsProto:s.dnsProto, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
 function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
-
-function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0};
-  let other=0; list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
+function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0}; let other=0;
+  list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
   $("sAll").textContent=list.length; $("sV").textContent=c.vless; $("sM").textContent=c.vmess; $("sT").textContent=c.trojan;
   $("sSS").textContent=c.ss; $("sHY").textContent=c.hysteria2; $("sTU").textContent=c.tuic; $("sOT").textContent=other; }
 
-function iconBtn(cls,title,path){ const b=document.createElement("button"); b.className="rbtn"; b.title=title;
+function iconBtn(title,path){ const b=document.createElement("button"); b.className="rbtn"; b.title=title;
   b.innerHTML='<svg viewBox="0 0 24 24">'+path+'</svg>'; return b; }
+let dragFrom=-1;
 function renderRows(){
   const box=$("rows"); box.innerHTML="";
   ROWS.forEach((r,i)=>{
-    const row=document.createElement("div"); row.className="arow"+(r.on?"":" off");
+    const row=document.createElement("div"); row.className="arow"+(r.on?"":" off"); row.draggable=true;
+    row.ondragstart=()=>{ dragFrom=i; row.classList.add("drag"); };
+    row.ondragend=()=>row.classList.remove("drag");
+    row.ondragover=e=>e.preventDefault();
+    row.ondrop=e=>{ e.preventDefault(); if(dragFrom<0||dragFrom===i) return; reorder(dragFrom,i); };
+    const grip=document.createElement("span"); grip.className="grip"; grip.innerHTML='<svg viewBox="0 0 24 24"><path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/></svg>';
     const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=r.on;
     cb.onchange=()=>{ r.on=cb.checked; row.className="arow"+(r.on?"":" off"); };
     const tx=document.createElement("input"); tx.type="text"; tx.value=r.tag; tx.oninput=()=>{ r.tag=tx.value; };
     const btns=document.createElement("div"); btns.className="rowbtns";
-    const qrB=iconBtn("qr","QR",'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7h-7"/>');
-    qrB.onclick=()=>showQR(r);
-    const cpB=iconBtn("cp","Salin link",'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>');
-    cpB.onclick=()=>copyLink(r);
-    const upB=iconBtn("up","Naik",'<path d="M12 19V5M5 12l7-7 7 7"/>'); upB.onclick=()=>move(i,-1);
-    const dnB=iconBtn("dn","Turun",'<path d="M12 5v14M5 12l7 7 7-7"/>'); dnB.onclick=()=>move(i,1);
-    btns.append(qrB,cpB,upB,dnB);
-    row.append(cb,tx,btns); box.appendChild(row);
+    const edB=iconBtn("Edit",'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>'); edB.onclick=()=>editNode(i);
+    const qrB=iconBtn("QR",'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7h-7"/>'); qrB.onclick=()=>showQR(r);
+    const cpB=iconBtn("Salin link",'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'); cpB.onclick=()=>copyLink(r);
+    btns.append(edB,qrB,cpB);
+    row.append(grip,cb,tx,btns); box.appendChild(row);
   });
   $("list").classList.toggle("on", ROWS.length>0);
 }
-function move(i,d){ const j=i+d; if(j<0||j>=ROWS.length) return; const t=ROWS[i]; ROWS[i]=ROWS[j]; ROWS[j]=t;
-  const a=ACCS[i]; ACCS[i]=ACCS[j]; ACCS[j]=a; renderRows(); }
-function copyLink(r){ if(!r.raw) return toast("Node dari YAML — tanpa link URI",true);
+function reorder(from,to){ const r=ROWS.splice(from,1)[0]; ROWS.splice(to,0,r);
+  const a=ACCS.splice(from,1)[0]; ACCS.splice(to,0,a); renderRows(); }
+function copyLink(r){ if(!r.raw) return toast("Node dari YAML — tanpa link",true);
   (navigator.clipboard?navigator.clipboard.writeText(r.raw):Promise.reject())
     .then(()=>toast("Link disalin")).catch(()=>{ const t=document.createElement("textarea"); t.value=r.raw; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); toast("Link disalin"); }); }
 function qrSvg(text){ const q=QR.encode(text), n=q.size, pad=4, dim=n+pad*2; let rc="";
   for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(q.matrix[r][c]) rc+='<rect x="'+(c+pad)+'" y="'+(r+pad)+'" width="1" height="1"/>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+dim+' '+dim+'" shape-rendering="crispEdges"><rect width="'+dim+'" height="'+dim+'" fill="#fff"/><g fill="#000">'+rc+'</g></svg>'; }
-function showQR(r){ if(!r.raw) return toast("Node dari YAML — tanpa link URI",true);
+function showQR(r){ if(!r.raw) return toast("Node dari YAML — tanpa link",true);
   try{ $("qrImg").innerHTML=qrSvg(r.raw); }catch(e){ return toast("Link terlalu panjang untuk QR",true); }
   $("qrName").textContent=r.tag; $("qrRaw").textContent=r.raw; $("qrOverlay").classList.add("on"); }
 $("qrClose").onclick=()=>$("qrOverlay").classList.remove("on");
 $("qrOverlay").onclick=e=>{ if(e.target===$("qrOverlay")) $("qrOverlay").classList.remove("on"); };
 
-function stripFlag(s){ return s.replace(/^\s*[\u{1F1E6}-\u{1F1FF}]{2}\s*/u,""); }
-$("btnBulkFlag").onclick=()=>{ const v=$("flagBulk").value; if(!v) return;
-  ROWS.forEach(r=>{ const base=stripFlag(r.tag.replace(/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)/i,m=>m));
-    // insert flag after the KIND-NN prefix if present
-    const mm=/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)?(.*)$/u.exec(r.tag);
-    const prefix=mm[1]||""; let rest=stripFlag(mm[2]||"");
-    r.tag = prefix + (v==="__none__"?"":v+" ") + rest; });
-  renderRows(); toast("Bendera diterapkan"); };
+/* per-node edit */
+let editIdx=-1;
+function editNode(i){ editIdx=i; const a=ACCS[i];
+  $("edName").value=ROWS[i].tag; $("edServer").value=a.server||""; $("edPort").value=a.port||"";
+  $("edSni").value=a.sni||(a._clash&&(a._clash.sni||a._clash.servername))||""; $("edHost").value=a.host||(a._clash&&a._clash["ws-opts"]&&a._clash["ws-opts"].headers&&a._clash["ws-opts"].headers.Host)||"";
+  $("edCred").value=a.cred||a.uuid||""; $("editOverlay").classList.add("on"); }
+$("edSave").onclick=()=>{ if(editIdx<0) return; const a=ACCS[editIdx];
+  applyToAccount(a,{server:$("edServer").value.trim(),port:$("edPort").value.trim(),sni:$("edSni").value.trim(),host:$("edHost").value.trim(),cred:$("edCred").value.trim()});
+  const nm=$("edName").value.trim(); if(nm) ROWS[editIdx].tag=nm;
+  $("editOverlay").classList.remove("on"); renderRows(); toast("Node diperbarui"); };
+$("edCancel").onclick=()=>$("editOverlay").classList.remove("on");
+$("editOverlay").onclick=e=>{ if(e.target===$("editOverlay")) $("editOverlay").classList.remove("on"); };
+
+/* mass bug-host / sni */
+$("bugApply").onclick=()=>{ if(!ACCS.length) return toast("Belum ada akun",true);
+  const sv=$("bugServer").value.trim(); if(!sv) return toast("Isi server/bug dulu",true);
+  ACCS.forEach(a=>applyToAccount(a,{server:sv})); toast("Server diganti ke semua node"); regen(); };
+$("sniApply").onclick=()=>{ if(!ACCS.length) return toast("Belum ada akun",true);
+  const sni=$("sniVal").value.trim(), host=$("hostVal").value.trim(); if(!sni&&!host) return toast("Isi SNI/Host dulu",true);
+  ACCS.forEach(a=>applyToAccount(a,{sni:sni,host:host})); toast("SNI/Host diterapkan"); regen(); };
 
 function regen(){ if(!ACCS.length) return toast("Belum ada akun",true);
   const o=readOpt(), keep=[], names=[];
@@ -1341,16 +1446,13 @@ function regen(){ if(!ACCS.length) return toast("Belum ada akun",true);
 function run(){
   const o=readOpt(); const ex=expand($("uri").value);
   const accs=[], raws=[], seen={}, notes=[]; let dup=0;
-  if(ex.clash){
-    let ing=[]; try{ ing=ingestClash(ex.text); }catch(e){ ing=[]; }
+  if(ex.clash){ let ing=[]; try{ ing=ingestClash(ex.text); }catch(e){ ing=[]; }
     if(!ing.length) return toast("Config Clash tak terbaca",true);
     ing.forEach(a=>{ const f=fp(a); if(seen[f]){dup++;return;} seen[f]=1; accs.push(a); raws.push(null); });
     notes.push('<div class="ok">'+accs.length+" node dari config Clash YAML.</div>");
-  } else {
-    if(!ex.lines.length) return toast("Belum ada link",true);
+  } else { if(!ex.lines.length) return toast("Belum ada link",true);
     ex.lines.forEach((l,i)=>{ try{ const a=parseOne(l), f=fp(a); if(seen[f]){dup++;return;} seen[f]=1; accs.push(a); raws.push(l.trim()); }
-      catch(e){ notes.push('<div class="bad">Baris '+(i+1)+" dilewati — "+e.message+"</div>"); } });
-  }
+      catch(e){ notes.push('<div class="bad">Baris '+(i+1)+" dilewati — "+e.message+"</div>"); } }); }
   if(!accs.length){ $("log").innerHTML=notes.join("")||'<div class="bad">Tidak ada akun valid.</div>'; return toast("Tidak ada akun valid",true); }
   OUT=emitOutput(build(accs,o),o); FNAME=fileName(o);
   ACCS=accs; ROWS=build.tags.map((t,i)=>({tag:t,on:true,raw:raws[i]}));
@@ -1359,17 +1461,18 @@ function run(){
   notes.unshift('<div class="ok">'+accs.length+" akun dipakai"+(dup?", "+dup+" duplikat dibuang":"")+".</div>");
   $("log").innerHTML=notes.join(""); toast("Config siap — "+accs.length+" akun");
 }
-
 $("btnRegen").onclick=regen; $("btnGo").onclick=run;
 $("btnPaste").onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(!t) throw 0;
   const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+t.trim():t.trim(); toast("Ditempel"); }
   catch(e){ $("uri").focus(); toast("Tempel manual",true); } };
+$("btnImport").onclick=()=>$("fileIn").click();
+$("fileIn").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+String(rd.result).trim():String(rd.result).trim(); toast("File diimpor: "+f.name); }; rd.readAsText(f); e.target.value=""; };
 $("btnClear").onclick=()=>{ $("uri").value=""; OUT=""; ACCS=[]; ROWS=[]; renderRows();
   ["sAll","sV","sM","sT","sSS","sHY","sTU","sOT"].forEach(i=>$(i).textContent="0");
-  $("log").innerHTML=""; $("out").className="empty"; $("out").textContent="Tempel link akun di atas, lalu tekan tombol emas."; $("uri").focus(); };
+  $("log").innerHTML=""; $("out").className="empty"; $("out").textContent=LANG==="id"?"Tempel link akun di atas, lalu tekan tombol emas.":"Paste account links above, then press the gold button."; $("uri").focus(); };
 $("btnCopy").onclick=async()=>{ if(!OUT) return toast("Belum ada config",true);
-  try{ await navigator.clipboard.writeText(OUT); }catch(e){ const t=document.createElement("textarea"); t.value=OUT; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
-  toast("Tersalin"); };
+  try{ await navigator.clipboard.writeText(OUT); }catch(e){ const t=document.createElement("textarea"); t.value=OUT; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); } toast("Tersalin"); };
 $("btnDl").onclick=()=>{ if(!OUT) return toast("Belum ada config",true);
   const u=URL.createObjectURL(new Blob([OUT],{type:"text/yaml"})); const a=document.createElement("a"); a.href=u; a.download=FNAME; a.click(); URL.revokeObjectURL(u); toast("Tersimpan: "+FNAME); };
 
@@ -1378,12 +1481,20 @@ $("btnUrl").onclick=async()=>{ const url=$("subUrl").value.trim(); if(!/^https?:
   toast("Mengambil…"); let text="";
   try{ const r=await fetch(url); if(r.ok) text=await r.text(); }catch(e){}
   if(!text){ for(const p of CORS){ try{ const r=await fetch(p+encodeURIComponent(url)); if(r.ok){ text=await r.text(); if(text) break; } }catch(e){} } }
-  if(!text) return toast("Gagal mengambil (CORS). Salin manual isinya.",true);
+  if(!text) return toast("Gagal (CORS). Salin manual.",true);
   const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+text.trim():text.trim(); toast("Subscription diambil"); };
+
+/* theme + lang toggles */
+$("btnTheme").onclick=()=>{ const cur=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
+  document.documentElement.setAttribute("data-theme",cur); try{localStorage.setItem("cassanova_theme",cur);}catch(e){} $("btnTheme").textContent=cur==="light"?"☾":"☀"; };
+$("btnLang").onclick=()=>setLang(LANG==="id"?"en":"id");
 
 if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }catch(e){} }
 
-loadLast(); sync();
+(function initTheme(){ let th="dark"; try{ th=localStorage.getItem("cassanova_theme")||"dark"; }catch(e){}
+  document.documentElement.setAttribute("data-theme",th); $("btnTheme").textContent=th==="light"?"☾":"☀"; })();
+loadLast();
+(function initLang(){ let l="id"; try{ l=localStorage.getItem("cassanova_lang")||"id"; }catch(e){} setLang(l); })();
 
 </script>
 </body>
