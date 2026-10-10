@@ -256,6 +256,8 @@
   html[data-theme="light"] .pill, html[data-theme="light"] .act, html[data-theme="light"] .rbtn{ background:#eef1f6; color:var(--tx) }
   html[data-theme="light"] pre{ color:#2a3340 }
   html[data-theme="light"] .htoggles button{ background:#eef1f6 }
+  /* bigger input box now that subscription row is gone */
+  textarea#uri{min-height:132px}
 </style>
 </head>
 <body>
@@ -278,11 +280,7 @@
   </div>
   <input type="file" id="fileIn" accept=".txt,.yaml,.yml,.conf,text/*" style="display:none">
   <textarea id="uri" spellcheck="false" placeholder="vless:// vmess:// trojan:// ss:// ssr:// hysteria2:// hysteria:// tuic:// anytls:// socks://&#10;&#10;Isi subscription Base64 atau config Clash YAML juga bisa."></textarea>
-  <div class="mini">
-    <input type="text" id="subUrl" placeholder="https://… URL subscription (opsional)">
-    <button class="pill" id="btnUrl"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> <span data-i18n="tFetch">Ambil</span></button>
-  </div>
-  <p class="desc" data-i18n="linkDesc">Satu link per baris. 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga.</p>
+  <p class="desc" data-i18n="linkDesc">Satu link per baris. 10 protokol + ingest config Clash YAML.</p>
 
   <div class="divider"><i></i><span data-i18n="secSet">PENGATURAN</span><i></i></div>
 
@@ -390,7 +388,7 @@
     <button class="act" id="btnDl"><svg class="ic" style="color:var(--ok)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> <span data-i18n="tDl">Unduh</span></button>
   </div>
   <div class="log" id="log"></div>
-  <div class="privacy" data-i18n="privacy">Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali Ambil-dari-URL).</div>
+  <div class="privacy" data-i18n="privacy">Semua diproses di HP ini. Link akun tidak dikirim ke mana pun.</div>
   <div class="ver">CASSANOVA Clash v4.0 · 10 protokol · region/streaming · edit node · QR · EN/ID · tema</div>
   <div class="credit-wrap"><div class="credit"><span>by: amiercassanova</span><i class="sep"></i>
     <a class="cbtn" href="https://t.me/kang_rebahan" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.5 4.3 2.9 11.4c-.9.3-.9 1.6.1 1.9l4.6 1.4 1.8 5.4c.3.8 1.3 1 1.9.4l2.5-2.4 4.6 3.4c.7.5 1.7.1 1.9-.7l3.2-14.4c.2-.9-.7-1.6-1.5-1.3z"/></svg></a>
@@ -1271,7 +1269,7 @@ let OUT="", FNAME="config-clash.yaml", LANG="id";
 const T={
   linkHead:{id:"\u{1F4DD} LINK AKUN",en:"\u{1F4DD} ACCOUNT LINKS"},
   tPaste:{id:"Tempel",en:"Paste"}, tClear:{id:"Bersihkan",en:"Clear"}, tImport:{id:"Impor",en:"Import"}, tFetch:{id:"Ambil",en:"Fetch"},
-  linkDesc:{id:"Satu link per baris. 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga.",en:"One link per line. 10 protocols + Clash YAML ingest. Fetch-from-URL uses a third-party proxy."},
+  linkDesc:{id:"Satu link per baris. 10 protokol + ingest config Clash YAML.",en:"One link per line. 10 protocols + Clash YAML ingest."},
   secSet:{id:"PENGATURAN",en:"SETTINGS"}, secRes:{id:"✨ HASIL CONFIG",en:"✨ RESULT"},
   lDev:{id:"Perangkat tujuan",en:"Target device"}, lRuleset:{id:"Profil aturan",en:"Rule profile"},
   lOutput:{id:"Keluaran",en:"Output"}, lSpd:{id:"Kecepatan cek server",en:"Health-check speed"},
@@ -1292,7 +1290,7 @@ const T={
   secBug:{id:"GANTI BUG HOST / SNI (MASSAL)",en:"REPLACE BUG HOST / SNI (BULK)"},
   tApply:{id:"Terapkan",en:"Apply"}, tRegen:{id:"Buat ulang dari daftar",en:"Rebuild from list"},
   tCopy:{id:"Salin",en:"Copy"}, tDl:{id:"Unduh",en:"Download"},
-  privacy:{id:"Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali Ambil-dari-URL).",en:"Everything runs on this device. Links are never sent anywhere (except Fetch-from-URL)."},
+  privacy:{id:"Semua diproses di HP ini. Link akun tidak dikirim ke mana pun.",en:"Everything runs on this device. Account links are never sent anywhere."},
   edTitle:{id:"Edit Node",en:"Edit Node"}, edName:{id:"Nama",en:"Name"}, edServer:{id:"Server / Bug",en:"Server / Bug"},
   edPort:{id:"Port",en:"Port"}, edSni:{id:"SNI",en:"SNI"}, edHost:{id:"Host",en:"Host"}, edCred:{id:"UUID / Password",en:"UUID / Password"},
   edSave:{id:"Simpan",en:"Save"}, edCancel:{id:"Batal",en:"Cancel"}, qrClose:{id:"Tutup",en:"Close"},
@@ -1475,14 +1473,6 @@ $("btnCopy").onclick=async()=>{ if(!OUT) return toast("Belum ada config",true);
   try{ await navigator.clipboard.writeText(OUT); }catch(e){ const t=document.createElement("textarea"); t.value=OUT; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); } toast("Tersalin"); };
 $("btnDl").onclick=()=>{ if(!OUT) return toast("Belum ada config",true);
   const u=URL.createObjectURL(new Blob([OUT],{type:"text/yaml"})); const a=document.createElement("a"); a.href=u; a.download=FNAME; a.click(); URL.revokeObjectURL(u); toast("Tersimpan: "+FNAME); };
-
-const CORS=["https://corsproxy.io/?url=","https://api.allorigins.win/raw?url=","https://thingproxy.freeboard.io/fetch/"];
-$("btnUrl").onclick=async()=>{ const url=$("subUrl").value.trim(); if(!/^https?:\/\//i.test(url)) return toast("URL tidak valid",true);
-  toast("Mengambil…"); let text="";
-  try{ const r=await fetch(url); if(r.ok) text=await r.text(); }catch(e){}
-  if(!text){ for(const p of CORS){ try{ const r=await fetch(p+encodeURIComponent(url)); if(r.ok){ text=await r.text(); if(text) break; } }catch(e){} } }
-  if(!text) return toast("Gagal (CORS). Salin manual.",true);
-  const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+text.trim():text.trim(); toast("Subscription diambil"); };
 
 /* theme + lang toggles */
 $("btnTheme").onclick=()=>{ const cur=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
