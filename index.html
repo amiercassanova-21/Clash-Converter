@@ -258,6 +258,11 @@
   html[data-theme="light"] .htoggles button{ background:#eef1f6 }
   /* bigger input box now that subscription row is gone */
   textarea#uri{min-height:132px}
+  /* fit 5 row-buttons (edit, QR, copy, up, down) on narrow phones */
+  .rowbtns{gap:3px}
+  .rbtn{width:27px;height:27px}
+  .rbtn svg{width:13px;height:13px}
+  .arow input[type=text]{min-width:48px}
 </style>
 </head>
 <body>
@@ -1386,7 +1391,6 @@ function renderRows(){
     row.ondragend=()=>row.classList.remove("drag");
     row.ondragover=e=>e.preventDefault();
     row.ondrop=e=>{ e.preventDefault(); if(dragFrom<0||dragFrom===i) return; reorder(dragFrom,i); };
-    const grip=document.createElement("span"); grip.className="grip"; grip.innerHTML='<svg viewBox="0 0 24 24"><path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/></svg>';
     const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=r.on;
     cb.onchange=()=>{ r.on=cb.checked; row.className="arow"+(r.on?"":" off"); };
     const tx=document.createElement("input"); tx.type="text"; tx.value=r.tag; tx.oninput=()=>{ r.tag=tx.value; };
@@ -1394,11 +1398,14 @@ function renderRows(){
     const edB=iconBtn("Edit",'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>'); edB.onclick=()=>editNode(i);
     const qrB=iconBtn("QR",'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7h-7"/>'); qrB.onclick=()=>showQR(r);
     const cpB=iconBtn("Salin link",'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'); cpB.onclick=()=>copyLink(r);
-    btns.append(edB,qrB,cpB);
-    row.append(grip,cb,tx,btns); box.appendChild(row);
+    const upB=iconBtn("Naik",'<path d="M12 19V5M5 12l7-7 7 7"/>'); upB.onclick=()=>move(i,-1);
+    const dnB=iconBtn("Turun",'<path d="M12 5v14M5 12l7 7 7-7"/>'); dnB.onclick=()=>move(i,1);
+    btns.append(edB,qrB,cpB,upB,dnB);
+    row.append(cb,tx,btns); box.appendChild(row);
   });
   $("list").classList.toggle("on", ROWS.length>0);
 }
+function move(i,d){ const j=i+d; if(j<0||j>=ROWS.length) return; reorder(i,j); }
 function reorder(from,to){ const r=ROWS.splice(from,1)[0]; ROWS.splice(to,0,r);
   const a=ACCS.splice(from,1)[0]; ACCS.splice(to,0,a); renderRows(); }
 function copyLink(r){ if(!r.raw) return toast("Node dari YAML — tanpa link",true);
@@ -1459,10 +1466,23 @@ function run(){
   notes.unshift('<div class="ok">'+accs.length+" akun dipakai"+(dup?", "+dup+" duplikat dibuang":"")+".</div>");
   $("log").innerHTML=notes.join(""); toast("Config siap — "+accs.length+" akun");
 }
+function stripFlag(s){ return s.replace(/^\s*[\u{1F1E6}-\u{1F1FF}]{2}\s*/u,""); }
+$("btnBulkFlag").onclick=()=>{ const v=$("flagBulk").value; if(!v) return toast("Pilih bendera dulu",true);
+  if(!ROWS.length) return toast("Belum ada akun",true);
+  ROWS.forEach(r=>{ const mm=/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)?([\s\S]*)$/u.exec(r.tag);
+    const prefix=mm[1]||""; const rest=stripFlag(mm[2]||""); r.tag = prefix + (v==="__none__"?"":v+" ") + rest; });
+  renderRows(); toast("Bendera diterapkan"); };
+
 $("btnRegen").onclick=regen; $("btnGo").onclick=run;
-$("btnPaste").onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(!t) throw 0;
-  const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+t.trim():t.trim(); toast("Ditempel"); }
-  catch(e){ $("uri").focus(); toast("Tempel manual",true); } };
+$("btnPaste").onclick=async()=>{
+  if(navigator.clipboard && navigator.clipboard.readText){
+    try{ const t=await navigator.clipboard.readText();
+      if(t){ const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+t.trim():t.trim(); toast("Ditempel"); return; } }
+    catch(e){}
+  }
+  $("uri").focus();
+  toast(window.isSecureContext===false?"Buka situs lewat HTTPS agar Tempel otomatis. Sementara: tahan di kotak → Tempel.":"Clipboard diblokir. Tahan di kotak → Tempel, atau ketuk saran di keyboard.",true);
+};
 $("btnImport").onclick=()=>$("fileIn").click();
 $("fileIn").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader();
   rd.onload=()=>{ const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+String(rd.result).trim():String(rd.result).trim(); toast("File diimpor: "+f.name); }; rd.readAsText(f); e.target.value=""; };
