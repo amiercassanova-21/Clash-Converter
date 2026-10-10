@@ -1624,7 +1624,19 @@ $("btnTheme").onclick=()=>{ const cur=document.documentElement.getAttribute("dat
 $("btnLang").onclick=()=>setLang(LANG==="id"?"en":"id");
 $("btnReset").onclick=()=>{ applySettings(DEFAULTS); sync(); toast(LANG==="id"?"Setelan direset ke default":"Settings reset to default"); };
 
-if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }catch(e){} }
+if("serviceWorker" in navigator){ try{
+  navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(reg=>{
+    try{ reg.update(); }catch(e){}
+    reg.addEventListener&&reg.addEventListener("updatefound",()=>{
+      const nw=reg.installing; if(!nw) return;
+      nw.addEventListener("statechange",()=>{
+        if(nw.state==="installed" && navigator.serviceWorker.controller){ try{ nw.postMessage("skipWaiting"); }catch(e){} }
+      });
+    });
+  }).catch(()=>{});
+  let _reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(_reloaded) return; _reloaded=true; location.reload(); });
+}catch(e){} }
 
 (function initTheme(){ let th="dark"; try{ th=localStorage.getItem("cassanova_theme")||"dark"; }catch(e){}
   document.documentElement.setAttribute("data-theme",th); $("btnTheme").textContent=th==="light"?"☾":"☀"; })();
