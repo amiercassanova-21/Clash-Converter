@@ -334,10 +334,12 @@
     </div>
     <div class="two">
       <div class="fld"><div class="lbl" data-i18n="lDnsP">Penyedia DNS</div>
-        <div class="sel-wrap"><select id="dnsProvider"><option value="cloudflare" selected>Cloudflare</option><option value="google">Google</option><option value="adguard">AdGuard</option><option value="quad9">Quad9</option></select></div><p class="desc" id="dDnsP"></p></div>
+        <div class="sel-wrap"><select id="dnsProvider"><option value="cloudflare" selected>Cloudflare</option><option value="google">Google</option><option value="adguard">AdGuard</option><option value="quad9">Quad9</option><option value="custom">Custom…</option></select></div><p class="desc" id="dDnsP"></p></div>
       <div class="fld"><div class="lbl" data-i18n="lDnsProto">Protokol DNS</div>
         <div class="sel-wrap"><select id="dnsProto"><option value="doh" selected>DoH</option><option value="dot">DoT</option><option value="doq">DoQ</option></select></div><p class="desc" id="dDnsProto"></p></div>
     </div>
+    <div class="fld" id="dnsCustomWrap" style="display:none"><div class="lbl" data-i18n="lDnsCustom">Alamat DNS custom</div>
+      <input type="text" id="dnsCustom" placeholder="https://dns.contoh/dns-query  |  tls://1.1.1.1  |  quic://..  |  8.8.8.8"><p class="desc" data-i18n="hDnsCustom">Isi DNS Anda sendiri — DoH (https://), DoT (tls://), DoQ (quic://), atau IP biasa.</p></div>
     <div class="two">
       <div class="fld"><div class="lbl" data-i18n="lTest">URL cek kecepatan</div>
         <div class="sel-wrap"><select id="testurl"><option value="gstatic" selected>gstatic 204</option><option value="cloudflare">cloudflare 204</option><option value="apple">apple 204</option></select></div><p class="desc" id="dTest"></p></div>
@@ -357,6 +359,7 @@
     <div data-i18n-html="expl1"></div><div data-i18n-html="expl2"></div>
   </details>
 
+  <button class="pill" id="btnReset" style="width:100%; margin-top:10px" data-i18n="reset">↺ Reset setelan</button>
   <button class="go" id="btnGo" data-i18n="btnGo">⚡ BUAT CONFIG CLASH</button>
 </div>
 
@@ -1188,9 +1191,10 @@ function build(accs, o, override){
   if(o.quic==="all") rules.push("AND,((NETWORK,udp),(DST-PORT,443)),REJECT");
   rules.push("MATCH,"+G.PROXY);
 
-  const prov=DNSP[o.dnsProvider]||DNSP.cloudflare;
   const proto=["doh","dot","doq"].includes(o.dnsProto)?o.dnsProto:"doh";
-  const remoteNS=prov[proto]||prov.doh;
+  let remoteNS;
+  if(o.dnsProvider==="custom" && o.dnsCustom && String(o.dnsCustom).trim()){ remoteNS=String(o.dnsCustom).trim(); }
+  else { const prov=DNSP[o.dnsProvider]||DNSP.cloudflare; remoteNS=prov[proto]||prov.doh; }
   const dns={
     enable:true, listen:"0.0.0.0:1053", ipv6:ipv6,
     "enhanced-mode":"fake-ip", "fake-ip-range":"198.18.0.1/16",
@@ -1286,6 +1290,9 @@ const T={
   cStream:{id:"Grup streaming (unlock)",en:"Streaming group (unlock)"}, cLb:{id:"Bagi akun ke beberapa grup",en:"Split accounts into groups"},
   cSplit:{id:"Pisahkan grup per protokol",en:"Separate groups per protocol"},
   cIns:{id:"Lewati verifikasi sertifikat",en:"Skip cert verify"}, cIpv6:{id:"Aktifkan IPv6",en:"Enable IPv6"},
+  lDnsCustom:{id:"Alamat DNS custom",en:"Custom DNS address"},
+  hDnsCustom:{id:"Isi DNS Anda sendiri — DoH (https://), DoT (tls://), DoQ (quic://), atau IP biasa.",en:"Enter your own DNS — DoH (https://), DoT (tls://), DoQ (quic://), or a plain IP."},
+  reset:{id:"↺ Reset setelan",en:"↺ Reset settings"},
   hPort:{id:"Port lokal proxy (HTTP+SOCKS). Ubah jika bentrok dengan app lain.",en:"Local proxy port (HTTP+SOCKS). Change if it clashes with another app."},
   hSecret:{id:"Password API dashboard. Kosongkan untuk lokal 127.0.0.1.",en:"Dashboard API password. Leave empty for local 127.0.0.1."},
   hDnsSplit:{id:"Domain .id & privat diarahkan ke DNS sistem/ISP, bukan DNS luar.",en:"Local .id & private domains use the system/ISP DNS, not the external one."},
@@ -1323,7 +1330,7 @@ const D={
     adb:{on:"Blokir iklan aktif.",off:"Blokir iklan nonaktif."},
     fp:{chrome:"Sidik jari TLS Chrome — paling umum & aman.",firefox:"Menyerupai Firefox.",safari:"Menyerupai Safari.",ios:"Menyerupai iOS.",randomized:"Acak tiap koneksi.","":"Tanpa penyamaran (lebih mudah terdeteksi)."},
     tun:{mixed:"TCP via sistem + UDP via gvisor — seimbang.",gvisor:"Stack virtual — kompatibel, agak berat.",system:"Stack OS — tercepat, perlu dukungan OS."},
-    dnsP:{cloudflare:"1.1.1.1 — cepat & privat.",google:"8.8.8.8 — stabil.",adguard:"Blokir iklan di level DNS.",quad9:"Blokir domain berbahaya."},
+    dnsP:{cloudflare:"1.1.1.1 — cepat & privat.",google:"8.8.8.8 — stabil.",adguard:"Blokir iklan di level DNS.",quad9:"Blokir domain berbahaya.",custom:"Pakai DNS yang Anda isi di bawah."},
     dnsProto:{doh:"DNS over HTTPS — paling kompatibel.",dot:"DNS over TLS.",doq:"DNS over QUIC — tercepat, tak semua resolver dukung."},
     test:{gstatic:"Tes latensi via gstatic (balasan 204).",cloudflare:"Tes via Cloudflare (204).",apple:"Tes via Apple (204)."},
     lbs:{"consistent-hashing":"Domain sama → server sama (stabil untuk login/sesi).","round-robin":"Gilir rata tiap koneksi.","sticky-sessions":"Tujuan sama tetap ke server sama sementara."},
@@ -1343,7 +1350,7 @@ const D={
     adb:{on:"Ad blocking on.",off:"Ad blocking off."},
     fp:{chrome:"Chrome TLS fingerprint — most common & safe.",firefox:"Mimics Firefox.",safari:"Mimics Safari.",ios:"Mimics iOS.",randomized:"Randomized per connection.","":"No masking (easier to detect)."},
     tun:{mixed:"TCP via system + UDP via gvisor — balanced.",gvisor:"Virtual stack — compatible, a bit heavier.",system:"OS stack — fastest, needs OS support."},
-    dnsP:{cloudflare:"1.1.1.1 — fast & private.",google:"8.8.8.8 — stable.",adguard:"DNS-level ad blocking.",quad9:"Blocks malicious domains."},
+    dnsP:{cloudflare:"1.1.1.1 — fast & private.",google:"8.8.8.8 — stable.",adguard:"DNS-level ad blocking.",quad9:"Blocks malicious domains.",custom:"Uses the DNS you enter below."},
     dnsProto:{doh:"DNS over HTTPS — most compatible.",dot:"DNS over TLS.",doq:"DNS over QUIC — fastest, not all resolvers support it."},
     test:{gstatic:"Latency test via gstatic (204 reply).",cloudflare:"Test via Cloudflare (204).",apple:"Test via Apple (204)."},
     lbs:{"consistent-hashing":"Same domain → same server (stable for logins/sessions).","round-robin":"Round-robin each connection.","sticky-sessions":"Same destination sticks to same server for a while."},
@@ -1364,7 +1371,8 @@ function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch
 function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","porn","games","fpSel","tunstack","testurl","lbstrat","dnsProvider","dnsProto","port","secret"];
+const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","porn","games","fpSel","tunstack","testurl","lbstrat","dnsProvider","dnsProto","dnsCustom","port","secret"];
+const DEFAULTS={dev:"hp",ruleset:"minimal",output:"config",spd:"slow",grp:"3",flag:"",quic:"video",porn:"off",games:"proxy",fpSel:"chrome",tunstack:"mixed",testurl:"gstatic",lbstrat:"consistent-hashing",dnsProvider:"cloudflare",dnsProto:"doh",dnsCustom:"",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:true,oSplit:true,oIns:false,oIpv6:false,oDnsSplit:false,oGeo:false};
 const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oIns","oIpv6","oDnsSplit","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
@@ -1384,6 +1392,7 @@ function sync(){ const g=D[LANG];
   $("dFp").textContent=g.fp[$("fpSel").value]; $("dTun").textContent=g.tun[$("tunstack").value];
   $("dDnsP").textContent=g.dnsP[$("dnsProvider").value]; $("dDnsProto").textContent=g.dnsProto[$("dnsProto").value];
   $("dTest").textContent=g.test[$("testurl").value]; $("dLbs").textContent=g.lbs[$("lbstrat").value];
+  $("dnsCustomWrap").style.display=$("dnsProvider").value==="custom"?"block":"none";
   saveLast();
 }
 SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); if(e){ e.addEventListener("change",sync); e.addEventListener("input",sync); } });
@@ -1394,7 +1403,7 @@ function readOpt(){ const s=settings();
     adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games,
     lb:s.oLb, split:s.oSplit, ins:s.oIns, fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
     testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack,
-    dnsProvider:s.dnsProvider, dnsProto:s.dnsProto, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
+    dnsProvider:s.dnsProvider, dnsProto:s.dnsProto, dnsCustom:s.dnsCustom, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
 function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
 function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0}; let other=0;
   list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
@@ -1462,12 +1471,14 @@ $("sniApply").onclick=()=>{ if(!ACCS.length) return toast("Belum ada akun",true)
   const sni=$("sniVal").value.trim(), host=$("hostVal").value.trim(); if(!sni&&!host) return toast("Isi SNI/Host dulu",true);
   ACCS.forEach(a=>applyToAccount(a,{sni:sni,host:host})); toast("SNI/Host diterapkan"); regen(); };
 
+function summaryLine(cfg,o){ if(o.output==="provider") return cfg.proxies.length+" proxy (provider)";
+  return cfg["proxy-groups"].length+" grup · "+cfg.rules.length+" aturan · "+cfg.proxies.length+" proxy"; }
 function regen(){ if(!ACCS.length) return toast("Belum ada akun",true);
   const o=readOpt(), keep=[], names=[];
   ROWS.forEach((r,i)=>{ if(r.on){ keep.push(ACCS[i]); names.push(r.tag.trim()||null); } });
   if(!keep.length) return toast("Semua akun dimatikan",true);
-  OUT=emitOutput(build(keep,o,names),o); FNAME=fileName(o);
-  countStat(keep); $("out").className=""; $("out").textContent=OUT; toast("Config dibuat ulang — "+keep.length+" akun"); }
+  const cfg=build(keep,o,names); OUT=emitOutput(cfg,o); FNAME=fileName(o);
+  countStat(keep); $("out").className=""; $("out").textContent=OUT; toast("Dibuat ulang — "+summaryLine(cfg,o)); }
 
 function run(){
   const o=readOpt(); const ex=expand($("uri").value);
@@ -1480,10 +1491,11 @@ function run(){
     ex.lines.forEach((l,i)=>{ try{ const a=parseOne(l), f=fp(a); if(seen[f]){dup++;return;} seen[f]=1; accs.push(a); raws.push(l.trim()); }
       catch(e){ notes.push('<div class="bad">Baris '+(i+1)+" dilewati — "+e.message+"</div>"); } }); }
   if(!accs.length){ $("log").innerHTML=notes.join("")||'<div class="bad">Tidak ada akun valid.</div>'; return toast("Tidak ada akun valid",true); }
-  OUT=emitOutput(build(accs,o),o); FNAME=fileName(o);
+  const cfg=build(accs,o); OUT=emitOutput(cfg,o); FNAME=fileName(o);
   ACCS=accs; ROWS=build.tags.map((t,i)=>({tag:t,on:true,raw:raws[i]}));
   renderRows(); countStat(accs);
   $("out").className=""; $("out").textContent=OUT;
+  notes.unshift('<div class="ok">Ringkasan: '+summaryLine(cfg,o)+'.</div>');
   notes.unshift('<div class="ok">'+accs.length+" akun dipakai"+(dup?", "+dup+" duplikat dibuang":"")+".</div>");
   $("log").innerHTML=notes.join(""); toast("Config siap — "+accs.length+" akun");
 }
@@ -1519,6 +1531,7 @@ $("btnDl").onclick=()=>{ if(!OUT) return toast("Belum ada config",true);
 $("btnTheme").onclick=()=>{ const cur=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
   document.documentElement.setAttribute("data-theme",cur); try{localStorage.setItem("cassanova_theme",cur);}catch(e){} $("btnTheme").textContent=cur==="light"?"☾":"☀"; };
 $("btnLang").onclick=()=>setLang(LANG==="id"?"en":"id");
+$("btnReset").onclick=()=>{ applySettings(DEFAULTS); sync(); toast(LANG==="id"?"Setelan direset ke default":"Settings reset to default"); };
 
 if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }catch(e){} }
 
