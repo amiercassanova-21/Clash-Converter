@@ -315,14 +315,13 @@
   </div>
   <div class="fld"><div class="lbl" data-i18n="lQuic">Blokir QUIC</div>
     <div class="sel-wrap"><select id="quic"><option value="video" selected>Hanya video</option><option value="all">Semua UDP 443</option><option value="off">Tidak</option></select></div>
-    <p class="desc" id="dQuic"></p><p class="warn" id="wQuic">Telepon WhatsApp bisa terganggu. Centang WhatsApp jalur langsung.</p></div>
+    <p class="desc" id="dQuic"></p></div>
 
   <label class="chk"><input type="checkbox" id="oAdb" checked><span class="box">✓</span><span><b data-i18n="cAdb">Blokir iklan (AdBlock)</b><span class="desc" id="dAdb"></span></span></label>
   <label class="chk"><input type="checkbox" id="oRegion"><span class="box">✓</span><span><b data-i18n="cRegion">Grup per region</b><span class="desc" id="dRegion"></span></span></label>
   <label class="chk"><input type="checkbox" id="oStream"><span class="box">✓</span><span><b data-i18n="cStream">Grup streaming (unlock)</b><span class="desc" id="dStream"></span></span></label>
   <label class="chk"><input type="checkbox" id="oLb" checked><span class="box">✓</span><span><b data-i18n="cLb">Bagi akun ke beberapa grup</b><span class="desc" id="dLb"></span></span></label>
   <label class="chk"><input type="checkbox" id="oSplit" checked><span class="box">✓</span><span><b data-i18n="cSplit">Pisahkan grup per protokol</b><span class="desc" id="dSplit"></span></span></label>
-  <label class="chk"><input type="checkbox" id="oWa" checked><span class="box">✓</span><span><b data-i18n="cWa">WhatsApp jalur langsung</b><span class="desc" id="dWa"></span></span></label>
   <label class="chk"><input type="checkbox" id="oIns"><span class="box">✓</span><span><b data-i18n="cIns">Lewati verifikasi sertifikat</b><span class="desc" id="dIns"></span></span></label>
 
   <details>
@@ -925,7 +924,15 @@ function detectFlag(a, fallback){
   if(has) return has[0];
   const label=(a.host||a.sni||a.server).split(".")[0];
   const hay=((a.remark||"")+" "+label).toLowerCase();
-  for(const [f,keys] of FLAGS) for(const k of keys) if(hay.includes(k)) return f;
+  const tokens=hay.split(/[^a-z0-9]+/).filter(Boolean);
+  // short codes (<=3 chars) match only as a standalone token or code+digits (sg, sg1, jkt) —
+  // never as a substring inside a word (so "adminn" won't match "in", "usage" won't match "usa").
+  const tokenHit=code=>{ for(const t of tokens){ if(t===code) return true;
+    if(t.startsWith(code) && /^\d+$/.test(t.slice(code.length))) return true; } return false; };
+  for(const [f,keys] of FLAGS) for(const k of keys){
+    if(k.length>=4){ if(hay.includes(k)) return f; }
+    else if(tokenHit(k)) return f;
+  }
   if(/(^|[^a-z])id(\d|[^a-z]|$)/.test(hay)) return "🇮🇩";
   return fallback;
 }
@@ -1162,11 +1169,6 @@ function build(accs, o, override){
   if(o.adblock) groups.push({ name:G.ADB, type:"select", proxies:["REJECT","DIRECT"] });
 
   const rules=[];
-  if(o.wa){
-    ["whatsapp.net","whatsapp.com","wa.me","g.whatsapp.net","mmg.whatsapp.net"].forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
-    rules.push("PROCESS-NAME,com.whatsapp,DIRECT");
-    rules.push("PROCESS-NAME,com.whatsapp.w4b,DIRECT");
-  }
   ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","127.0.0.0/8","100.64.0.0/10"].forEach(c=>rules.push("IP-CIDR,"+c+",DIRECT,no-resolve"));
   rules.push("IP-CIDR6,fc00::/7,DIRECT,no-resolve");
   rules.push("IP-CIDR6,::1/128,DIRECT,no-resolve");
@@ -1282,7 +1284,7 @@ const T={
   lQuic:{id:"Blokir QUIC",en:"Block QUIC"}, lPorn:{id:"Konten porno",en:"Porn content"}, lGames:{id:"Game",en:"Games"},
   cAdb:{id:"Blokir iklan (AdBlock)",en:"Block ads (AdBlock)"}, cRegion:{id:"Grup per region",en:"Per-region groups"},
   cStream:{id:"Grup streaming (unlock)",en:"Streaming group (unlock)"}, cLb:{id:"Bagi akun ke beberapa grup",en:"Split accounts into groups"},
-  cSplit:{id:"Pisahkan grup per protokol",en:"Separate groups per protocol"}, cWa:{id:"WhatsApp jalur langsung",en:"WhatsApp direct"},
+  cSplit:{id:"Pisahkan grup per protokol",en:"Separate groups per protocol"},
   cIns:{id:"Lewati verifikasi sertifikat",en:"Skip cert verify"}, cIpv6:{id:"Aktifkan IPv6",en:"Enable IPv6"},
   advSum:{id:"Setelan lanjutan",en:"Advanced settings"}, explSum:{id:"Penjelasan tiap pilihan",en:"Explanation of each option"},
   lFp:{id:"Fingerprint TLS (uTLS)",en:"TLS fingerprint (uTLS)"}, lTun:{id:"Tumpukan TUN",en:"TUN stack"},
@@ -1301,8 +1303,8 @@ const T={
   edSave:{id:"Simpan",en:"Save"}, edCancel:{id:"Batal",en:"Cancel"}, qrClose:{id:"Tutup",en:"Close"},
   expl1:{id:"<p><b>Grup.</b> Selalu ada \u{1F680} Proxy berisi ♻️ Best Ping, ⚖️ Load Balance, \u{1F501} Fallback, \u{1F310} Global, \u{1F6D1} AdBlock, plus grup region & \u{1F3AC} Streaming bila diaktifkan.</p><p><b>Profil aturan.</b> Minimal = ringkas; Lengkap = tambah geosite (iklan, privat, lokal/bank/gov ID, STUN, GEOIP ID) — unduh database sekali.</p><p><b>Deteksi bendera.</b> Otomatis dari nama/host (sg, jkt, tokyo, dll). ‘Tanpa bendera’ hanya untuk node yang tak terdeteksi.</p><p><b>Ganti bug host / SNI.</b> Ubah alamat server (bug) atau SNI & Host untuk semua node sekaligus; atau edit satu node lewat tombol edit.</p>",
         en:"<p><b>Groups.</b> Always a \u{1F680} Proxy holding ♻️ Best Ping, ⚖️ Load Balance, \u{1F501} Fallback, \u{1F310} Global, \u{1F6D1} AdBlock, plus region & \u{1F3AC} Streaming groups when enabled.</p><p><b>Rule profile.</b> Minimal = lean; Full = adds geosite (ads, private, local/bank/gov ID, STUN, GEOIP ID) — downloads geo databases once.</p><p><b>Flag detection.</b> Automatic from name/host (sg, jkt, tokyo, ...). ‘No flag’ only applies to nodes that can’t be detected.</p><p><b>Replace bug host / SNI.</b> Change server (bug) or SNI & Host for all nodes at once; or edit a single node via its edit button.</p>"},
-  expl2:{id:"<p><b>Fingerprint TLS.</b> Menyamarkan sidik jari TLS (uTLS) di semua node, lebih tahan DPI.</p><p><b>AdBlock.</b> GEOSITE ads → grup \u{1F6D1} AdBlock (REJECT/DIRECT), bisa dimatikan per situs.</p><p><b>DNS.</b> Pilih penyedia (Cloudflare/Google/AdGuard/Quad9) & protokol (DoH/DoT/DoQ). Split DNS mengarahkan domain lokal ID ke DNS sistem.</p><p><b>Blokir QUIC.</b> Mode video pakai aturan AND + sniffer; mode semua menutup seluruh UDP 443.</p>",
-        en:"<p><b>TLS fingerprint.</b> Masks the TLS fingerprint (uTLS) on all nodes, more DPI-resistant.</p><p><b>AdBlock.</b> GEOSITE ads → \u{1F6D1} AdBlock group (REJECT/DIRECT), toggleable per site.</p><p><b>DNS.</b> Pick a provider (Cloudflare/Google/AdGuard/Quad9) & protocol (DoH/DoT/DoQ). Split DNS sends local ID domains to the system DNS.</p><p><b>Block QUIC.</b> Video mode uses AND rules + sniffer; all mode blocks all UDP 443.</p>"}
+  expl2:{id:"<p><b>Fingerprint TLS.</b> Menyamarkan sidik jari TLS (uTLS) di semua node, lebih tahan DPI.</p><p><b>AdBlock.</b> GEOSITE ads → grup \u{1F6D1} AdBlock (REJECT/DIRECT) di aplikasi Clash.</p><p><b>DNS.</b> Pilih penyedia (Cloudflare/Google/AdGuard/Quad9) & protokol (DoH/DoT/DoQ). Split DNS mengarahkan domain lokal ID ke DNS sistem.</p><p><b>Blokir QUIC.</b> Mode video pakai aturan AND + sniffer; mode semua menutup seluruh UDP 443.</p>",
+        en:"<p><b>TLS fingerprint.</b> Masks the TLS fingerprint (uTLS) on all nodes, more DPI-resistant.</p><p><b>AdBlock.</b> GEOSITE ads → \u{1F6D1} AdBlock group (REJECT/DIRECT) in the Clash app.</p><p><b>DNS.</b> Pick a provider (Cloudflare/Google/AdGuard/Quad9) & protocol (DoH/DoT/DoQ). Split DNS sends local ID domains to the system DNS.</p><p><b>Block QUIC.</b> Video mode uses AND rules + sniffer; all mode blocks all UDP 443.</p>"}
 };
 const D={
   id:{ dev:{hp:"Controller 127.0.0.1:9090, allow-lan mati.",router:"Controller 0.0.0.0:9090, allow-lan nyala."},
@@ -1313,12 +1315,12 @@ const D={
     quic:{video:"Video dipaksa lewat tunnel; lainnya bebas.",all:"Semua UDP 443 ditutup.",off:"Tidak diblokir."},
     flag:{"":"Bendera dideteksi otomatis dari nama/host. Pilihan ini hanya untuk node yang tak terdeteksi (dibiarkan polos).","\u{1F1F8}\u{1F1EC}":"Node tak terdeteksi dianggap Singapura.","\u{1F1EE}\u{1F1E9}":"Node tak terdeteksi dianggap Indonesia."},
     porn:{off:"Dibiarkan.",reject:"Diblokir (geosite porn → REJECT)."}, games:{proxy:"Lewat tunnel.",direct:"Langsung tanpa tunnel.",off:"Ikut aturan umum."},
-    adb:{on:"Iklan diblokir; bisa dimatikan per situs.",off:"Tidak memblokir iklan."},
+    adb:{on:"Iklan diblokir. Matikan lewat grup \u{1F6D1} AdBlock di aplikasi Clash (ganti REJECT→DIRECT).",off:"Tidak memblokir iklan."},
     region:{on:"Grup url-test per region otomatis dari bendera.",off:"Tanpa grup region."},
     stream:{on:"Grup \u{1F3AC} Streaming + aturan Netflix/Disney/YouTube dll.",off:"Tanpa grup streaming."},
     lb:{on:"Disebar ke Primary/Backup/Tertiary.",off:"Hanya grup utama."},
     split:{on:"Tiap protokol punya grup auto sendiri.",off:"Dicampur."},
-    wa:{on:"WhatsApp direct.",off:"WhatsApp ikut tunnel."}, ins:{on:"Jalan walau sertifikat tak cocok.",off:"Sertifikat diperiksa ketat."} },
+    ins:{on:"Jalan walau sertifikat tak cocok.",off:"Sertifikat diperiksa ketat."} },
   en:{ dev:{hp:"Controller 127.0.0.1:9090, allow-lan off.",router:"Controller 0.0.0.0:9090, allow-lan on."},
     ruleset:{minimal:"Lean rules.",full:"Adds geosite (ads, private, local/bank/gov ID, STUN, GEOIP ID) — downloads once."},
     output:{config:"Ready-to-use Clash config.",provider:"Proxies block only."},
@@ -1327,12 +1329,12 @@ const D={
     quic:{video:"Video forced through tunnel; others free.",all:"All UDP 443 blocked.",off:"Not blocked."},
     flag:{"":"Flags are auto-detected from name/host. This only applies to undetected nodes (left plain).","\u{1F1F8}\u{1F1EC}":"Undetected nodes treated as Singapore.","\u{1F1EE}\u{1F1E9}":"Undetected nodes treated as Indonesia."},
     porn:{off:"Allowed.",reject:"Blocked (geosite porn → REJECT)."}, games:{proxy:"Through tunnel.",direct:"Direct, no tunnel.",off:"Follows general rules."},
-    adb:{on:"Ads blocked; toggleable per site.",off:"Ads not blocked."},
+    adb:{on:"Ads blocked. Toggle via the \u{1F6D1} AdBlock group in the Clash app (REJECT→DIRECT).",off:"Ads not blocked."},
     region:{on:"Auto url-test group per region from flags.",off:"No region groups."},
     stream:{on:"\u{1F3AC} Streaming group + Netflix/Disney/YouTube rules.",off:"No streaming group."},
     lb:{on:"Spread across Primary/Backup/Tertiary.",off:"Main groups only."},
     split:{on:"Each protocol gets its own auto group.",off:"Mixed."},
-    wa:{on:"WhatsApp direct.",off:"WhatsApp via tunnel."}, ins:{on:"Works even if cert mismatches.",off:"Cert checked strictly."} }
+    ins:{on:"Works even if cert mismatches.",off:"Cert checked strictly."} }
 };
 function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch(e){}
   document.querySelectorAll("[data-i18n]").forEach(e=>{ const k=e.getAttribute("data-i18n"); if(T[k]) e.textContent=T[k][l]; });
@@ -1346,7 +1348,7 @@ function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
 const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","porn","games","fpSel","tunstack","testurl","lbstrat","dnsProvider","dnsProto","port","secret"];
-const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oWa","oIns","oIpv6","oDnsSplit","oGeo"];
+const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oIns","oIpv6","oDnsSplit","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
 const LAST="cassanova_clash_v4_last";
@@ -1361,8 +1363,7 @@ function sync(){ const g=D[LANG];
   $("dAdb").textContent=$("oAdb").checked?g.adb.on:g.adb.off; $("dRegion").textContent=$("oRegion").checked?g.region.on:g.region.off;
   $("dStream").textContent=$("oStream").checked?g.stream.on:g.stream.off;
   $("dLb").textContent=$("oLb").checked?g.lb.on:g.lb.off; $("dSplit").textContent=$("oSplit").checked?g.split.on:g.split.off;
-  $("dWa").textContent=$("oWa").checked?g.wa.on:g.wa.off; $("dIns").textContent=$("oIns").checked?g.ins.on:g.ins.off;
-  $("wQuic").classList.toggle("on", $("quic").value==="all" && !$("oWa").checked);
+  $("dIns").textContent=$("oIns").checked?g.ins.on:g.ins.off;
   saveLast();
 }
 SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); if(e){ e.addEventListener("change",sync); e.addEventListener("input",sync); } });
@@ -1371,7 +1372,7 @@ let ACCS=[], ROWS=[];
 function readOpt(){ const s=settings();
   return { dev:s.dev, ruleset:s.ruleset, output:s.output, spd:s.spd, grp:parseInt(s.grp,10), flag:s.flag, quic:s.quic,
     adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games,
-    lb:s.oLb, split:s.oSplit, wa:s.oWa, ins:s.oIns, fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
+    lb:s.oLb, split:s.oSplit, ins:s.oIns, fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
     testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack,
     dnsProvider:s.dnsProvider, dnsProto:s.dnsProto, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
 function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
@@ -1468,10 +1469,10 @@ function run(){
 }
 function stripFlag(s){ return s.replace(/^\s*[\u{1F1E6}-\u{1F1FF}]{2}\s*/u,""); }
 $("btnBulkFlag").onclick=()=>{ const v=$("flagBulk").value; if(!v) return toast("Pilih bendera dulu",true);
-  if(!ROWS.length) return toast("Belum ada akun",true);
-  ROWS.forEach(r=>{ const mm=/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)?([\s\S]*)$/u.exec(r.tag);
+  const sel=ROWS.filter(r=>r.on); if(!sel.length) return toast("Centang dulu akun yang mau diubah",true);
+  sel.forEach(r=>{ const mm=/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)?([\s\S]*)$/u.exec(r.tag);
     const prefix=mm[1]||""; const rest=stripFlag(mm[2]||""); r.tag = prefix + (v==="__none__"?"":v+" ") + rest; });
-  renderRows(); toast("Bendera diterapkan"); };
+  renderRows(); regen(); toast("Bendera diterapkan ke "+sel.length+" akun"); };
 
 $("btnRegen").onclick=regen; $("btnGo").onclick=run;
 $("btnPaste").onclick=async()=>{
