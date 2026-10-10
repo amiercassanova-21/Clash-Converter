@@ -210,6 +210,26 @@
   .qr-box .qraw{font-size:9.5px; color:var(--tx3); word-break:break-all; max-height:60px; overflow:auto; font-family:ui-monospace,monospace}
   .qr-box .qclose{margin-top:12px}
   .ver{font-size:9.5px; color:var(--tx3); text-align:center; margin-top:8px}
+  /* compact overrides (keep all content & descriptions, just tighten spacing) */
+  body{padding:12px 10px 26px}
+  .head-card{padding:18px 16px 15px}
+  h1{font-size:25px}
+  .badge{margin-top:10px; padding:6px 16px}
+  .card{padding:13px}
+  .card + .card{margin-top:10px}
+  .rowhead{margin-top:12px}
+  .fld{margin-top:9px}
+  .two{gap:8px}
+  .divider{margin-top:12px}
+  .chk{margin-top:9px}
+  .desc{margin-top:4px}
+  details{margin-top:10px; padding:9px 11px}
+  details p{margin-top:8px; line-height:1.5}
+  .go{margin-top:12px; padding:12px}
+  .stats{margin-top:10px}
+  .mini{margin-top:8px}
+  textarea{min-height:62px}
+  pre{height:168px}
 </style>
 </head>
 <body>
@@ -235,13 +255,6 @@
     <button class="pill" id="btnUrl"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> Ambil</button>
   </div>
   <p class="desc">Satu link per baris. Mendukung 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga (link keluar dari HP).</p>
-
-  <div class="divider"><i></i><span>PROFIL TERSIMPAN</span><i></i></div>
-  <div class="bulk">
-    <div class="sel-wrap"><select id="profSel"><option value="">— pilih profil —</option></select></div>
-    <button class="pill" id="profSave">Simpan</button>
-    <button class="pill" id="profDel">Hapus</button>
-  </div>
 
   <div class="divider"><i></i><span>PENGATURAN</span><i></i></div>
 
@@ -1243,14 +1256,9 @@ const SET_CHK=["oAdb","oLb","oSplit","oWa","oIns","oIpv6"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null) $(i).value=s[i]; });
   SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean") $(i).checked=s[i]; }); }
-const LAST="cassanova_clash_v3_last", PROF="cassanova_clash_v3_profiles";
+const LAST="cassanova_clash_v3_last";
 function saveLast(){ try{ localStorage.setItem(LAST, JSON.stringify(settings())); }catch(e){} }
 function loadLast(){ try{ applySettings(JSON.parse(localStorage.getItem(LAST)||"null")); }catch(e){} }
-function getProfiles(){ try{ return JSON.parse(localStorage.getItem(PROF)||"{}"); }catch(e){ return {}; } }
-function setProfiles(p){ try{ localStorage.setItem(PROF, JSON.stringify(p)); }catch(e){} }
-function refreshProfiles(sel){ const p=getProfiles(); const el=$("profSel");
-  el.innerHTML='<option value="">— pilih profil —</option>'+Object.keys(p).map(n=>'<option>'+n.replace(/</g,"&lt;")+'</option>').join("");
-  if(sel) el.value=sel; }
 
 function sync(){
   $("dDev").textContent=D.dev[$("dev").value]; $("dRuleset").textContent=D.ruleset[$("ruleset").value];
@@ -1373,16 +1381,9 @@ $("btnUrl").onclick=async()=>{ const url=$("subUrl").value.trim(); if(!/^https?:
   if(!text) return toast("Gagal mengambil (CORS). Salin manual isinya.",true);
   const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+text.trim():text.trim(); toast("Subscription diambil"); };
 
-$("profSave").onclick=()=>{ const name=(prompt("Nama profil:")||"").trim(); if(!name) return;
-  const p=getProfiles(); p[name]=settings(); setProfiles(p); refreshProfiles(name); toast("Profil disimpan: "+name); };
-$("profDel").onclick=()=>{ const name=$("profSel").value; if(!name) return toast("Pilih profil dulu",true);
-  const p=getProfiles(); delete p[name]; setProfiles(p); refreshProfiles(""); toast("Profil dihapus"); };
-$("profSel").onchange=()=>{ const name=$("profSel").value; if(!name) return; const p=getProfiles();
-  if(p[name]){ applySettings(p[name]); sync(); toast("Profil dimuat: "+name); } };
-
 if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }catch(e){} }
 
-loadLast(); refreshProfiles(); sync();
+loadLast(); sync();
 
 </script>
 </body>
