@@ -296,23 +296,19 @@
       <div class="sel-wrap"><select id="ruleset"><option value="minimal" selected>Minimal</option><option value="full">Lengkap (geosite)</option></select></div><p class="desc" id="dRuleset"></p></div>
   </div>
   <div class="two">
-    <div class="fld"><div class="lbl" data-i18n="lOutput">Keluaran</div>
-      <div class="sel-wrap"><select id="output"><option value="config" selected>Config</option><option value="provider">Proxy-provider</option></select></div><p class="desc" id="dOutput"></p></div>
     <div class="fld"><div class="lbl" data-i18n="lSpd">Kecepatan cek server</div>
       <div class="sel-wrap"><select id="spd"><option value="fast">20s</option><option value="mid">1m</option><option value="slow" selected>5m</option></select></div><p class="desc" id="dSpd"></p></div>
-  </div>
-  <div class="two">
     <div class="fld"><div class="lbl" data-i18n="lGrp">Jumlah grup auto</div>
       <div class="sel-wrap"><select id="grp"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></div><p class="desc" id="dGrp"></p></div>
-    <div class="fld"><div class="lbl" data-i18n="lFlag">Bendera bawaan</div>
-      <div class="sel-wrap"><select id="flag"><option value="" selected>Tanpa bendera</option><option value="🇸🇬">🇸🇬 Singapura</option><option value="🇮🇩">🇮🇩 Indonesia</option></select></div><p class="desc" id="dFlag"></p></div>
   </div>
   <div class="two">
+    <div class="fld"><div class="lbl" data-i18n="lFlag">Bendera bawaan</div>
+      <div class="sel-wrap"><select id="flag"><option value="" selected>Tanpa bendera</option><option value="🇸🇬">🇸🇬 Singapura</option><option value="🇮🇩">🇮🇩 Indonesia</option></select></div><p class="desc" id="dFlag"></p></div>
     <div class="fld"><div class="lbl" data-i18n="lPorn">Konten porno</div>
       <div class="sel-wrap"><select id="porn"><option value="off" selected>Biarkan</option><option value="reject">Blokir</option></select></div><p class="desc" id="dPorn"></p></div>
-    <div class="fld"><div class="lbl" data-i18n="lGames">Game</div>
-      <div class="sel-wrap"><select id="games"><option value="proxy" selected>Lewat tunnel</option><option value="direct">Direct</option><option value="off">Default</option></select></div><p class="desc" id="dGames"></p></div>
   </div>
+  <div class="fld"><div class="lbl" data-i18n="lGames">Game</div>
+    <div class="sel-wrap"><select id="games"><option value="proxy" selected>Lewat tunnel</option><option value="direct">Direct</option><option value="off">Default</option></select></div><p class="desc" id="dGames"></p></div>
   <div class="fld"><div class="lbl" data-i18n="lQuic">Blokir QUIC</div>
     <div class="sel-wrap"><select id="quic"><option value="video" selected>Hanya video</option><option value="all">Semua UDP 443</option><option value="off">Tidak</option></select></div>
     <p class="desc" id="dQuic"></p></div>
@@ -327,29 +323,19 @@
   <details>
     <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg> <span data-i18n="advSum">Setelan lanjutan</span></summary>
     <div class="two" style="margin-top:10px">
-      <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="lFp">Fingerprint TLS (uTLS)</div>
-        <div class="sel-wrap"><select id="fpSel"><option value="chrome" selected>chrome</option><option value="firefox">firefox</option><option value="safari">safari</option><option value="ios">ios</option><option value="randomized">randomized</option><option value="">off</option></select></div><p class="desc" id="dFp"></p></div>
+      <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="lDnsP">Penyedia DNS</div>
+        <div class="sel-wrap"><select id="dnsProvider"><option value="cloudflare" selected>Cloudflare</option><option value="google">Google</option><option value="adguard">AdGuard</option><option value="quad9">Quad9</option><option value="custom">Custom…</option></select></div><p class="desc" id="dDnsP"></p></div>
       <div class="fld" style="margin-top:0"><div class="lbl" data-i18n="lTun">Tumpukan TUN</div>
         <div class="sel-wrap"><select id="tunstack"><option value="mixed" selected>mixed</option><option value="gvisor">gvisor</option><option value="system">system</option></select></div><p class="desc" id="dTun"></p></div>
-    </div>
-    <div class="two">
-      <div class="fld"><div class="lbl" data-i18n="lDnsP">Penyedia DNS</div>
-        <div class="sel-wrap"><select id="dnsProvider"><option value="cloudflare" selected>Cloudflare</option><option value="google">Google</option><option value="adguard">AdGuard</option><option value="quad9">Quad9</option><option value="custom">Custom…</option></select></div><p class="desc" id="dDnsP"></p></div>
-      <div class="fld"><div class="lbl" data-i18n="lDnsProto">Protokol DNS</div>
-        <div class="sel-wrap"><select id="dnsProto"><option value="doh" selected>DoH</option><option value="dot">DoT</option><option value="doq">DoQ</option></select></div><p class="desc" id="dDnsProto"></p></div>
     </div>
     <div class="fld" id="dnsCustomWrap" style="display:none"><div class="lbl" data-i18n="lDnsCustom">Alamat DNS custom</div>
       <input type="text" id="dnsCustom" placeholder="https://dns.contoh/dns-query  |  tls://1.1.1.1  |  quic://..  |  8.8.8.8"><p class="desc" data-i18n="hDnsCustom">Isi DNS Anda sendiri — DoH (https://), DoT (tls://), DoQ (quic://), atau IP biasa.</p></div>
     <div class="two">
       <div class="fld"><div class="lbl" data-i18n="lTest">URL cek kecepatan</div>
         <div class="sel-wrap"><select id="testurl"><option value="gstatic" selected>gstatic 204</option><option value="cloudflare">cloudflare 204</option><option value="apple">apple 204</option></select></div><p class="desc" id="dTest"></p></div>
-      <div class="fld"><div class="lbl" data-i18n="lLbs">Strategi Load Balance</div>
-        <div class="sel-wrap"><select id="lbstrat"><option value="consistent-hashing" selected>consistent-hashing</option><option value="round-robin">round-robin</option><option value="sticky-sessions">sticky-sessions</option></select></div><p class="desc" id="dLbs"></p></div>
-    </div>
-    <div class="two">
       <div class="fld"><div class="lbl" data-i18n="lPort">Port mixed</div><input type="text" id="port" value="7890" inputmode="numeric"><p class="desc" data-i18n="hPort">Port lokal proxy (HTTP+SOCKS). Ubah jika bentrok dengan app lain.</p></div>
-      <div class="fld"><div class="lbl" data-i18n="lSecret">Secret controller</div><input type="text" id="secret" placeholder="kosong"><p class="desc" data-i18n="hSecret">Password API dashboard. Kosongkan untuk lokal 127.0.0.1.</p></div>
     </div>
+    <div class="fld"><div class="lbl" data-i18n="lSecret">Secret controller</div><input type="text" id="secret" placeholder="kosong"><p class="desc" data-i18n="hSecret">Password API dashboard. Kosongkan untuk lokal 127.0.0.1.</p></div>
     <label class="chk"><input type="checkbox" id="oDnsSplit"><span class="box">✓</span><span><b data-i18n="cDnsSplit">Split DNS (lokal ID direct)</b><span class="desc" data-i18n="hDnsSplit">Domain .id & privat diarahkan ke DNS sistem/ISP, bukan DNS luar.</span></span></label>
     <label class="chk"><input type="checkbox" id="oGeo"><span class="box">✓</span><span><b data-i18n="cGeo">Auto-update geo database</b><span class="desc" data-i18n="hGeo">Unduh ulang GeoIP/GeoSite tiap 24 jam (pakai sedikit kuota).</span></span></label>
     <label class="chk"><input type="checkbox" id="oIpv6"><span class="box">✓</span><span><b data-i18n="cIpv6">Aktifkan IPv6</b><span class="desc" data-i18n="hIpv6">Default mati agar tak bocor/lambat ke IPv6 lokal.</span></span></label>
@@ -1324,7 +1310,7 @@ const D={
     output:{config:"Config Clash siap pakai.",provider:"Hanya blok proxies."},
     grp:{"1":"Tanpa grup tambahan.","2":"Dibagi dua grup.","3":"Primary/Backup/Tertiary.","4":"Dibagi empat grup."},
     spd:{fast:"Cepat pindah; boros baterai.",mid:"Seimbang.",slow:"Hemat baterai, cocok banyak akun."},
-    quic:{video:"Video dipaksa lewat tunnel; lainnya bebas.",all:"Semua UDP 443 ditutup.",off:"Tidak diblokir."},
+    quic:{video:"QUIC = jalur UDP port 443 yang dipakai YouTube/TikTok/Instagram dan sering lolos keluar tunnel (boros kuota utama). Mode ini memaksa khusus domain video turun ke TCP agar tetap lewat tunnel; aplikasi lain & video call tidak diganggu. Disarankan.",all:"Menutup SEMUA UDP port 443. Semua aplikasi dipaksa turun ke TCP lewat tunnel — paling hemat kuota utama, tapi sebagian video call/game berbasis QUIC bisa melambat.",off:"QUIC/UDP 443 dibiarkan apa adanya — bisa lolos keluar tunnel, jadi sebagian trafik memakai kuota utama (bukan kuota tunnel)."},
     flag:{"":"Bendera dideteksi otomatis dari nama/host. Pilihan ini hanya untuk node yang tak terdeteksi (dibiarkan polos).","\u{1F1F8}\u{1F1EC}":"Node tak terdeteksi dianggap Singapura.","\u{1F1EE}\u{1F1E9}":"Node tak terdeteksi dianggap Indonesia."},
     porn:{off:"Dibiarkan.",reject:"Diblokir (geosite porn → REJECT)."}, games:{proxy:"Lewat tunnel.",direct:"Langsung tanpa tunnel.",off:"Ikut aturan umum."},
     adb:{on:"Blokir iklan aktif.",off:"Blokir iklan nonaktif."},
@@ -1344,7 +1330,7 @@ const D={
     output:{config:"Ready-to-use Clash config.",provider:"Proxies block only."},
     grp:{"1":"No extra groups.","2":"Split into two.","3":"Primary/Backup/Tertiary.","4":"Split into four."},
     spd:{fast:"Switches fast; battery-hungry.",mid:"Balanced.",slow:"Battery-friendly, good for many accounts."},
-    quic:{video:"Video forced through tunnel; others free.",all:"All UDP 443 blocked.",off:"Not blocked."},
+    quic:{video:"QUIC = UDP port 443 used by YouTube/TikTok/Instagram that often escapes the tunnel (burns main quota). This forces video domains down to TCP so they stay in the tunnel; other apps & video calls are untouched. Recommended.",all:"Blocks ALL UDP port 443. Every app is forced to TCP through the tunnel — most quota-saving, but some QUIC-based video calls/games may slow down.",off:"QUIC/UDP 443 left as-is — can escape the tunnel, so some traffic uses your main quota instead of the tunnel quota."},
     flag:{"":"Flags are auto-detected from name/host. This only applies to undetected nodes (left plain).","\u{1F1F8}\u{1F1EC}":"Undetected nodes treated as Singapore.","\u{1F1EE}\u{1F1E9}":"Undetected nodes treated as Indonesia."},
     porn:{off:"Allowed.",reject:"Blocked (geosite porn → REJECT)."}, games:{proxy:"Through tunnel.",direct:"Direct, no tunnel.",off:"Follows general rules."},
     adb:{on:"Ad blocking on.",off:"Ad blocking off."},
@@ -1371,8 +1357,8 @@ function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch
 function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","porn","games","fpSel","tunstack","testurl","lbstrat","dnsProvider","dnsProto","dnsCustom","port","secret"];
-const DEFAULTS={dev:"hp",ruleset:"minimal",output:"config",spd:"slow",grp:"3",flag:"",quic:"video",porn:"off",games:"proxy",fpSel:"chrome",tunstack:"mixed",testurl:"gstatic",lbstrat:"consistent-hashing",dnsProvider:"cloudflare",dnsProto:"doh",dnsCustom:"",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:true,oSplit:true,oIns:false,oIpv6:false,oDnsSplit:false,oGeo:false};
+const SET_IDS=["dev","ruleset","spd","grp","flag","quic","porn","games","tunstack","testurl","dnsProvider","dnsCustom","port","secret"];
+const DEFAULTS={dev:"hp",ruleset:"minimal",spd:"slow",grp:"3",flag:"",quic:"video",porn:"off",games:"proxy",tunstack:"mixed",testurl:"gstatic",dnsProvider:"cloudflare",dnsCustom:"",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:true,oSplit:true,oIns:false,oIpv6:false,oDnsSplit:false,oGeo:false};
 const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oIns","oIpv6","oDnsSplit","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
@@ -1382,16 +1368,16 @@ function loadLast(){ try{ applySettings(JSON.parse(localStorage.getItem(LAST)||"
 
 function sync(){ const g=D[LANG];
   $("dDev").textContent=g.dev[$("dev").value]; $("dRuleset").textContent=g.ruleset[$("ruleset").value];
-  $("dOutput").textContent=g.output[$("output").value]; $("dGrp").textContent=g.grp[$("grp").value];
+  $("dGrp").textContent=g.grp[$("grp").value];
   $("dSpd").textContent=g.spd[$("spd").value]; $("dQuic").textContent=g.quic[$("quic").value];
   $("dFlag").textContent=g.flag[$("flag").value]; $("dPorn").textContent=g.porn[$("porn").value]; $("dGames").textContent=g.games[$("games").value];
   $("dAdb").textContent=$("oAdb").checked?g.adb.on:g.adb.off; $("dRegion").textContent=$("oRegion").checked?g.region.on:g.region.off;
   $("dStream").textContent=$("oStream").checked?g.stream.on:g.stream.off;
   $("dLb").textContent=$("oLb").checked?g.lb.on:g.lb.off; $("dSplit").textContent=$("oSplit").checked?g.split.on:g.split.off;
   $("dIns").textContent=$("oIns").checked?g.ins.on:g.ins.off;
-  $("dFp").textContent=g.fp[$("fpSel").value]; $("dTun").textContent=g.tun[$("tunstack").value];
-  $("dDnsP").textContent=g.dnsP[$("dnsProvider").value]; $("dDnsProto").textContent=g.dnsProto[$("dnsProto").value];
-  $("dTest").textContent=g.test[$("testurl").value]; $("dLbs").textContent=g.lbs[$("lbstrat").value];
+  $("dTun").textContent=g.tun[$("tunstack").value];
+  $("dDnsP").textContent=g.dnsP[$("dnsProvider").value];
+  $("dTest").textContent=g.test[$("testurl").value];
   $("dnsCustomWrap").style.display=$("dnsProvider").value==="custom"?"block":"none";
   saveLast();
 }
@@ -1399,11 +1385,11 @@ SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); if(e){ e.addEventListener("
 
 let ACCS=[], ROWS=[];
 function readOpt(){ const s=settings();
-  return { dev:s.dev, ruleset:s.ruleset, output:s.output, spd:s.spd, grp:parseInt(s.grp,10), flag:s.flag, quic:s.quic,
+  return { dev:s.dev, ruleset:s.ruleset, spd:s.spd, grp:parseInt(s.grp,10), flag:s.flag, quic:s.quic,
     adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games,
-    lb:s.oLb, split:s.oSplit, ins:s.oIns, fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
-    testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack,
-    dnsProvider:s.dnsProvider, dnsProto:s.dnsProto, dnsCustom:s.dnsCustom, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
+    lb:s.oLb, split:s.oSplit, ins:s.oIns, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
+    testurl:s.testurl, tunstack:s.tunstack,
+    dnsProvider:s.dnsProvider, dnsCustom:s.dnsCustom, dnsSplit:s.oDnsSplit, geoUpdate:s.oGeo }; }
 function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
 function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0}; let other=0;
   list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
