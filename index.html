@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0f17">
 <title>CASSANOVA — Clash Multi Akun</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"CASSANOVA Clash","short_name":"Cassanova","start_url":".","display":"standalone","background_color":"%230b0f17","theme_color":"%230b0f17","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%230b0f17%22/%3E%3Ctext x=%2232%22 y=%2242%22 font-size=%2234%22 text-anchor=%22middle%22 fill=%22%23e0b23a%22%3E%E2%9A%A1%3C/text%3E%3C/svg%3E","sizes":"any","type":"image/svg+xml"}]}'>
 <style>
   :root{
     --bg:#070b12; --card:#111722; --sunk:#0a0f18; --line:#2a2e38; --line2:#454b59;
@@ -186,6 +188,28 @@
   .toast.on{opacity:1}
   @media (max-width:360px){ .two{grid-template-columns:1fr} h1{font-size:22px} }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+
+  .mini{display:flex; gap:8px; margin-top:9px}
+  .mini input[type=text]{flex:1}
+  .mini .pill{white-space:nowrap}
+  .rowbtns{display:flex; gap:4px; flex:0 0 auto}
+  .rbtn{width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,#2b3038,#15181e); border:1px solid var(--line2); border-bottom:2px solid #0c0e12; color:var(--tx)}
+  .rbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .rbtn:active{transform:translateY(1px)}
+  .arow input[type=text]{flex:1 1 auto; min-width:0}
+  .bulk{display:flex; gap:8px; align-items:center; margin:8px 0}
+  .bulk .sel-wrap{flex:1}
+  .qr-overlay{position:fixed; inset:0; background:rgba(3,6,11,.82); display:none; align-items:center; justify-content:center; z-index:50; padding:18px}
+  .qr-overlay.on{display:flex}
+  .qr-box{background:#0f1420; border:1px solid var(--line2); border-radius:18px; padding:16px; max-width:330px; width:100%; text-align:center;
+    box-shadow:0 0 26px rgba(201,161,60,.25), 0 12px 30px rgba(0,0,0,.8)}
+  .qr-box svg{width:248px; height:248px; border-radius:10px; background:#fff; padding:8px}
+  .qr-box .qname{font-size:12px; color:var(--gold-t); margin:10px 0 4px; word-break:break-all}
+  .qr-box .qraw{font-size:9.5px; color:var(--tx3); word-break:break-all; max-height:60px; overflow:auto; font-family:ui-monospace,monospace}
+  .qr-box .qclose{margin-top:12px}
+  .ver{font-size:9.5px; color:var(--tx3); text-align:center; margin-top:8px}
 </style>
 </head>
 <body>
@@ -205,51 +229,58 @@
       <button class="pill" id="btnClear"><svg class="ic" style="color:var(--bad)" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V4h6v3"/></svg> Bersihkan</button>
     </div>
   </div>
-  <textarea id="uri" spellcheck="false" placeholder="vless://&#10;vmess://&#10;trojan://&#10;ss://  hysteria2://  tuic://"></textarea>
-  <p class="desc">Satu link per baris. Mendukung VLESS, VMess, Trojan, Shadowsocks, Hysteria2, TUIC. Isi subscription (Base64) juga bisa ditempel langsung.</p>
+  <textarea id="uri" spellcheck="false" placeholder="vless:// vmess:// trojan:// ss:// ssr:// hysteria2:// hysteria:// tuic:// anytls:// socks://&#10;&#10;Isi subscription Base64 atau tempel config Clash YAML juga bisa."></textarea>
+  <div class="mini">
+    <input type="text" id="subUrl" placeholder="https://… URL subscription (opsional)">
+    <button class="pill" id="btnUrl"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> Ambil</button>
+  </div>
+  <p class="desc">Satu link per baris. Mendukung 10 protokol + ingest config Clash YAML. Ambil-dari-URL memakai proxy pihak ketiga (link keluar dari HP).</p>
+
+  <div class="divider"><i></i><span>PROFIL TERSIMPAN</span><i></i></div>
+  <div class="bulk">
+    <div class="sel-wrap"><select id="profSel"><option value="">— pilih profil —</option></select></div>
+    <button class="pill" id="profSave">Simpan</button>
+    <button class="pill" id="profDel">Hapus</button>
+  </div>
 
   <div class="divider"><i></i><span>PENGATURAN</span><i></i></div>
 
   <div class="two">
-    <div class="fld">
-      <div class="lbl">Perangkat tujuan</div>
+    <div class="fld"><div class="lbl">Perangkat tujuan</div>
       <div class="sel-wrap"><select id="dev" class="active-sel">
         <option value="hp" selected>HP (CMFA / FlClash / Verge)</option>
         <option value="router">Router / PC (Mihomo core)</option>
-      </select></div>
-      <p class="desc" id="dDev"></p>
-    </div>
-    <div class="fld">
-      <div class="lbl">Kecepatan cek server</div>
-      <div class="sel-wrap"><select id="spd">
-        <option value="fast">20 detik</option>
-        <option value="mid">1 menit</option>
-        <option value="slow" selected>5 menit</option>
-      </select></div>
-      <p class="desc" id="dSpd"></p>
-    </div>
+      </select></div><p class="desc" id="dDev"></p></div>
+    <div class="fld"><div class="lbl">Profil aturan</div>
+      <div class="sel-wrap"><select id="ruleset">
+        <option value="minimal" selected>Minimal</option>
+        <option value="full">Lengkap (geosite)</option>
+      </select></div><p class="desc" id="dRuleset"></p></div>
   </div>
 
   <div class="two">
-    <div class="fld">
-      <div class="lbl">Jumlah grup auto</div>
+    <div class="fld"><div class="lbl">Keluaran</div>
+      <div class="sel-wrap"><select id="output">
+        <option value="config" selected>Config penuh</option>
+        <option value="provider">Proxy-provider (proxies saja)</option>
+      </select></div><p class="desc" id="dOutput"></p></div>
+    <div class="fld"><div class="lbl">Kecepatan cek server</div>
+      <div class="sel-wrap"><select id="spd">
+        <option value="fast">20 detik</option><option value="mid">1 menit</option><option value="slow" selected>5 menit</option>
+      </select></div><p class="desc" id="dSpd"></p></div>
+  </div>
+
+  <div class="two">
+    <div class="fld"><div class="lbl">Jumlah grup auto</div>
       <div class="sel-wrap"><select id="grp">
-        <option value="1">1 grup</option>
-        <option value="2">2 grup</option>
-        <option value="3" selected>3 grup</option>
-        <option value="4">4 grup</option>
-      </select></div>
-      <p class="desc" id="dGrp"></p>
-    </div>
-    <div class="fld">
-      <div class="lbl">Bendera bawaan</div>
+        <option value="1">1 grup</option><option value="2">2 grup</option><option value="3" selected>3 grup</option><option value="4">4 grup</option>
+      </select></div><p class="desc" id="dGrp"></p></div>
+    <div class="fld"><div class="lbl">Bendera bawaan</div>
       <div class="sel-wrap"><select id="flag">
         <option value="" selected>Tanpa bendera</option>
         <option value="🇸🇬">🇸🇬 Singapura</option>
         <option value="🇮🇩">🇮🇩 Indonesia</option>
-      </select></div>
-      <p class="desc" id="dFlag"></p>
-    </div>
+      </select></div><p class="desc" id="dFlag"></p></div>
   </div>
 
   <div class="fld">
@@ -265,31 +296,56 @@
 
   <label class="chk"><input type="checkbox" id="oAdb" checked><span class="box">✓</span>
     <span><b>Blokir iklan (AdBlock)</b><span class="desc" id="dAdb"></span></span></label>
-
   <label class="chk"><input type="checkbox" id="oLb" checked><span class="box">✓</span>
     <span><b>Bagi akun ke beberapa grup</b><span class="desc" id="dLb"></span></span></label>
-
   <label class="chk"><input type="checkbox" id="oSplit" checked><span class="box">✓</span>
     <span><b>Pisahkan grup per protokol</b><span class="desc" id="dSplit"></span></span></label>
-
   <label class="chk"><input type="checkbox" id="oWa" checked><span class="box">✓</span>
     <span><b>WhatsApp jalur langsung</b><span class="desc" id="dWa"></span></span></label>
-
   <label class="chk"><input type="checkbox" id="oIns"><span class="box">✓</span>
     <span><b>Lewati verifikasi sertifikat</b><span class="desc" id="dIns"></span></span></label>
 
   <details>
-    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.5"/><path d="M12 17h.01"/></svg> Penjelasan lengkap tiap pilihan</summary>
-    <p><b>Grup yang dibuat.</b> Setiap config selalu berisi lima grup utama di bawah <b>🚀 Proxy</b>: <b>♻️ Best Ping</b> (url-test, otomatis tercepat), <b>⚖️ Load Balance</b> (sebar koneksi ke semua server — khas Clash), <b>🔁 Fallback</b> (cadangan berurutan), <b>🌐 Global</b> (pilih akun manual), dan <b>🛑 AdBlock</b>. Semua trafik masuk lewat 🚀 Proxy, jadi Anda cukup ganti satu grup itu lewat dashboard apa pun.</p>
-    <p><b>Perangkat tujuan.</b> Format YAML Clash sama untuk semua aplikasi, jadi tidak perlu pilih versi. HP memakai controller 127.0.0.1 dan allow-lan mati; Router/PC memakai 0.0.0.0 dan allow-lan nyala supaya panel bisa dibuka dari perangkat lain.</p>
-    <p><b>Blokir iklan (AdBlock).</b> Menambah aturan GEOSITE category-ads-all yang diarahkan ke grup 🛑 AdBlock berisi REJECT dan DIRECT. Default REJECT (iklan diblokir); kalau suatu situs rusak, ganti grup itu ke DIRECT lewat dashboard tanpa bikin ulang config. Database geosite diunduh otomatis oleh core saat pertama jalan.</p>
-    <p><b>Jumlah grup auto.</b> Selain lima grup utama, akun juga dibagi selang-seling ke Primary/Backup/Tertiary supaya trafik tidak menumpuk di satu server tercepat.</p>
-    <p><b>Kecepatan cek server.</b> Jarak waktu tiap pengujian semua akun (interval). Untuk akun banyak, 5 menit paling hemat baterai.</p>
-    <p><b>Blokir QUIC.</b> QUIC adalah UDP port 443 yang sering lolos keluar tunnel sehingga kuota utama terpakai. Mode video memakai aturan AND + sniffer untuk menutup QUIC hanya ke domain video; mode semua menutup seluruh UDP 443. Aplikasi lalu turun ke TCP dan tetap lewat tunnel.</p>
-    <p><b>Bendera bawaan.</b> Bendera diambil dari nama akun atau host. Yang tak terbaca memakai bendera bawaan ini.</p>
-    <p><b>WhatsApp jalur langsung.</b> DOMAIN-SUFFIX domain WhatsApp + PROCESS-NAME com.whatsapp diarahkan DIRECT, diletakkan di atas aturan QUIC, jadi WA aman walau semua UDP 443 diblokir.</p>
-    <p><b>Pisahkan grup per protokol.</b> VLESS port 80 (non-TLS) hampir selalu ping terendah dan selalu menang kalau dicampur, jadi tiap protokol (termasuk SS, Hysteria2, TUIC) dapat grup url-test sendiri. Grup hanya terbentuk kalau akunnya lebih dari satu.</p>
-    <p><b>Lewati verifikasi sertifikat.</b> Sama dengan skip-cert-verify. Enkripsi tetap jalan, hanya kecocokan nama sertifikat yang tidak diperiksa. Berguna untuk akun lewat IP bug.</p>
+    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg> Setelan lanjutan</summary>
+    <div class="two" style="margin-top:10px">
+      <div class="fld" style="margin-top:0"><div class="lbl">Fingerprint TLS (uTLS)</div>
+        <div class="sel-wrap"><select id="fpSel">
+          <option value="chrome" selected>chrome</option><option value="firefox">firefox</option>
+          <option value="safari">safari</option><option value="ios">ios</option>
+          <option value="randomized">randomized</option><option value="">matikan</option>
+        </select></div></div>
+      <div class="fld" style="margin-top:0"><div class="lbl">Tumpukan TUN</div>
+        <div class="sel-wrap"><select id="tunstack">
+          <option value="mixed" selected>mixed</option><option value="gvisor">gvisor</option><option value="system">system</option>
+        </select></div></div>
+    </div>
+    <div class="two">
+      <div class="fld"><div class="lbl">URL cek kecepatan</div>
+        <div class="sel-wrap"><select id="testurl">
+          <option value="gstatic" selected>gstatic 204</option><option value="cloudflare">cloudflare 204</option><option value="apple">apple 204</option>
+        </select></div></div>
+      <div class="fld"><div class="lbl">Strategi Load Balance</div>
+        <div class="sel-wrap"><select id="lbstrat">
+          <option value="consistent-hashing" selected>consistent-hashing</option><option value="round-robin">round-robin</option><option value="sticky-sessions">sticky-sessions</option>
+        </select></div></div>
+    </div>
+    <div class="two">
+      <div class="fld"><div class="lbl">Port mixed</div><input type="text" id="port" value="7890" inputmode="numeric"></div>
+      <div class="fld"><div class="lbl">Secret controller</div><input type="text" id="secret" placeholder="kosong"></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="oIpv6"><span class="box">✓</span>
+      <span><b>Aktifkan IPv6</b><span class="desc">Default mati agar tak bocor ke IPv6 lokal.</span></span></label>
+  </details>
+
+  <details>
+    <summary><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.6.3-.9.8-.9 1.4v.5"/><path d="M12 17h.01"/></svg> Penjelasan tiap pilihan</summary>
+    <p><b>Grup.</b> Selalu ada 🚀 Proxy berisi ♻️ Best Ping, ⚖️ Load Balance, 🔁 Fallback, 🌐 Global, dan 🛑 AdBlock. Semua trafik lewat 🚀 Proxy.</p>
+    <p><b>Profil aturan.</b> Minimal = aturan ringkas (lokal .id direct, IP privat, QUIC). Lengkap = tambah rule-set geosite: iklan, privat, layanan lokal/bank/gov Indonesia, STUN, dan GEOIP ID → DIRECT. Lengkap mengunduh database geosite/geoip sekali.</p>
+    <p><b>Keluaran.</b> Config penuh untuk dipakai langsung; Proxy-provider menghasilkan blok proxies saja untuk digabung ke config milik Anda.</p>
+    <p><b>Fingerprint TLS.</b> Menyamarkan sidik jari TLS (uTLS) di semua node agar lebih tahan DPI. Bisa dimatikan.</p>
+    <p><b>AdBlock.</b> Aturan GEOSITE ads → grup 🛑 AdBlock (REJECT/DIRECT), bisa dimatikan per situs lewat dashboard.</p>
+    <p><b>Blokir QUIC.</b> QUIC = UDP 443 yang sering lolos tunnel. Mode video memakai aturan AND + sniffer; mode semua menutup seluruh UDP 443.</p>
+    <p><b>Lainnya.</b> Health-check hemat baterai (lazy), WhatsApp direct di atas aturan QUIC, pisah protokol agar node cepat tak selalu menang, skip-cert untuk IP bug.</p>
   </details>
 
   <button class="go" id="btnGo">⚡ BUAT CONFIG CLASH</button>
@@ -297,7 +353,6 @@
 </div>
 
 <div class="card">
-
   <div class="divider"><i></i><span>✨ HASIL CONFIG</span><i></i></div>
 
   <div class="stats">
@@ -308,10 +363,22 @@
     <div class="stat"><span>SS</span><b id="sSS">0</b></div>
     <div class="stat"><span>Hy2</span><b id="sHY">0</b></div>
     <div class="stat"><span>TUIC</span><b id="sTU">0</b></div>
+    <div class="stat"><span>Lainnya</span><b id="sOT">0</b></div>
   </div>
 
   <div class="list" id="list">
-    <p class="listhead">Hapus centang untuk membuang akun. Nama boleh diubah, lalu tekan Buat ulang.</p>
+    <p class="listhead">Hapus centang untuk membuang akun. Ganti nama lalu Buat ulang. Tombol: QR, salin link, naik/turun.</p>
+    <div class="bulk">
+      <div class="sel-wrap"><select id="flagBulk">
+        <option value="">Bendera massal…</option>
+        <option value="🇸🇬">🇸🇬 Singapura</option>
+        <option value="🇮🇩">🇮🇩 Indonesia</option>
+        <option value="🇲🇾">🇲🇾 Malaysia</option>
+        <option value="🇯🇵">🇯🇵 Jepang</option>
+        <option value="__none__">Hapus bendera</option>
+      </select></div>
+      <button class="pill" id="btnBulkFlag">Terapkan</button>
+    </div>
     <div id="rows"></div>
     <button class="act" id="btnRegen" style="width:100%; margin-top:4px"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg> Buat ulang dari daftar</button>
   </div>
@@ -319,30 +386,177 @@
   <pre id="out" class="empty">Tempel link akun di atas, lalu tekan tombol emas.</pre>
 
   <div class="acts">
-    <button class="act" id="btnCopy"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Salin YAML</button>
+    <button class="act" id="btnCopy"><svg class="ic" style="color:var(--gold-t)" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Salin</button>
     <button class="act" id="btnDl"><svg class="ic" style="color:var(--ok)" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg> Unduh</button>
   </div>
 
   <div class="log" id="log"></div>
+  <div class="privacy">Semua diproses di HP ini. Link tidak dikirim ke mana pun (kecuali fitur Ambil-dari-URL).</div>
+  <div class="ver">CASSANOVA Clash v3.0 · 10 protokol · ingest YAML · QR · PWA</div>
 
-  <div class="privacy">Semua diproses di HP ini. Link akun tidak dikirim ke mana pun dan tidak ikut tersimpan.</div>
-
-  <div class="credit-wrap">
-    <div class="credit">
-      <span>by: amiercassanova</span>
-      <i class="sep"></i>
-      <a class="cbtn" href="https://t.me/kang_rebahan" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.5 4.3 2.9 11.4c-.9.3-.9 1.6.1 1.9l4.6 1.4 1.8 5.4c.3.8 1.3 1 1.9.4l2.5-2.4 4.6 3.4c.7.5 1.7.1 1.9-.7l3.2-14.4c.2-.9-.7-1.6-1.5-1.3z"/></svg></a>
-      <a class="cbtn" href="https://wa.link/3yhb8f" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.8 1.2-.5 0-1 .2-3.4-.8-2.9-1.2-4.7-4.2-4.8-4.4-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.6-.1l.8-1c.2-.2.3-.2.6-.1l2 .9c.2.1.4.2.4.4v.4z"/></svg></a>
-    </div>
-  </div>
+  <div class="credit-wrap"><div class="credit">
+    <span>by: amiercassanova</span><i class="sep"></i>
+    <a class="cbtn" href="https://t.me/kang_rebahan" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M21.5 4.3 2.9 11.4c-.9.3-.9 1.6.1 1.9l4.6 1.4 1.8 5.4c.3.8 1.3 1 1.9.4l2.5-2.4 4.6 3.4c.7.5 1.7.1 1.9-.7l3.2-14.4c.2-.9-.7-1.6-1.5-1.3z"/></svg></a>
+    <a class="cbtn" href="https://wa.link/3yhb8f" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.3 14c-.2.6-1.2 1.2-1.8 1.2-.5 0-1 .2-3.4-.8-2.9-1.2-4.7-4.2-4.8-4.4-.1-.2-1.1-1.5-1.1-2.8s.7-2 .9-2.2c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.6-.1l.8-1c.2-.2.3-.2.6-.1l2 .9c.2.1.4.2.4.4v.4z"/></svg></a>
+  </div></div>
   <div class="foot">© 2026 By: Amier Cassanova</div>
+</div></div>
 
+<div class="qr-overlay" id="qrOverlay"><div class="qr-box">
+  <div id="qrImg"></div>
+  <div class="qname" id="qrName"></div>
+  <div class="qraw" id="qrRaw"></div>
+  <button class="act qclose" id="qrClose">Tutup</button>
 </div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========== shared engine (identical to tested engine2.js) ========== */
-/* ===== CASSANOVA Clash engine v2 (vless/vmess/trojan/ss/hysteria2/tuic) ===== */
+/* ===== QR encoder ===== */
+/* Compact QR encoder — byte mode, versions 1..20, ECC level L. Returns {size, matrix[][]bool}. */
+(function(root){
+  // GF(256)
+  const EXP=new Array(512), LOG=new Array(256);
+  (function(){ let x=1; for(let i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11d; } for(let i=255;i<512;i++) EXP[i]=EXP[i-255]; })();
+  const gmul=(a,b)=> (a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
+  function rsPoly(n){ let p=[1]; for(let i=0;i<n;i++){ const np=new Array(p.length+1).fill(0);
+    for(let j=0;j<p.length;j++){ np[j]^=gmul(p[j],1); np[j+1]^=gmul(p[j],EXP[i]); } p=np; } return p; }
+  function rsEC(data,n){ const gen=rsPoly(n); const res=new Array(n).fill(0);
+    for(let i=0;i<data.length;i++){ const f=data[i]^res[0]; res.shift(); res.push(0);
+      if(f!==0) for(let j=0;j<n;j++) res[j]^=gmul(gen[j+1],f); } return res; }
+
+  // Level L block table v1..20: [ecPerBlock, [[nBlocks,dataCW],...]]
+  const ECL={
+    1:[7,[[1,19]]],2:[10,[[1,34]]],3:[15,[[1,55]]],4:[20,[[1,80]]],5:[26,[[1,108]]],
+    6:[18,[[2,68]]],7:[20,[[2,78]]],8:[24,[[2,97]]],9:[30,[[2,116]]],10:[18,[[2,68],[2,69]]],
+    11:[20,[[4,81]]],12:[24,[[2,92],[2,93]]],13:[26,[[4,107]]],14:[30,[[3,115],[1,116]]],
+    15:[22,[[5,87],[1,88]]],16:[24,[[5,98],[1,99]]],17:[28,[[1,107],[5,108]]],
+    18:[30,[[5,120],[1,121]]],19:[28,[[3,113],[4,114]]],20:[28,[[3,107],[5,108]]]
+  };
+  const ALIGN={1:[],2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],9:[6,26,46],
+    10:[6,28,50],11:[6,30,54],12:[6,32,58],13:[6,34,62],14:[6,26,46,66],15:[6,26,48,70],16:[6,26,50,74],
+    17:[6,30,54,78],18:[6,30,56,82],19:[6,30,58,86],20:[6,34,62,90]};
+  const REM={1:0,2:7,3:7,4:7,5:7,6:7,7:0,8:0,9:0,10:0,11:0,12:0,13:0,14:3,15:3,16:3,17:3,18:3,19:3,20:3};
+  function dataCap(v){ const [ec,groups]=ECL[v]; let d=0; groups.forEach(([n,dcw])=>d+=n*dcw); return d; }
+
+  function encode(text){
+    const bytes=[]; for(const ch of unescape(encodeURIComponent(text))) bytes.push(ch.charCodeAt(0)&0xff);
+    // choose version
+    let v=0; for(let i=1;i<=20;i++){ const ccBits=i<10?8:16; const need=4+ccBits+bytes.length*8; const capBits=dataCap(i)*8; if(need<=capBits){ v=i; break; } }
+    if(!v) throw new Error("QR: data terlalu panjang");
+    const [ecPer,groups]=ECL[v]; const ccBits=v<10?8:16;
+    // bit buffer
+    const bits=[]; const put=(val,len)=>{ for(let i=len-1;i>=0;i--) bits.push((val>>i)&1); };
+    put(0b0100,4); put(bytes.length,ccBits); bytes.forEach(b=>put(b,8));
+    const capBits=dataCap(v)*8;
+    for(let i=0;i<4 && bits.length<capBits;i++) bits.push(0); // terminator
+    while(bits.length%8!==0) bits.push(0);
+    const dataCW=[]; for(let i=0;i<bits.length;i+=8){ let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i+j]; dataCW.push(b); }
+    const pads=[0xEC,0x11]; let pi=0; while(dataCW.length<dataCap(v)) dataCW.push(pads[pi++%2]);
+    // split blocks
+    const blocksD=[], blocksE=[]; let off=0;
+    groups.forEach(([n,dcw])=>{ for(let b=0;b<n;b++){ const d=dataCW.slice(off,off+dcw); off+=dcw; blocksD.push(d); blocksE.push(rsEC(d,ecPer)); } });
+    // interleave
+    const maxD=Math.max(...blocksD.map(b=>b.length)); const finalCW=[];
+    for(let i=0;i<maxD;i++) blocksD.forEach(b=>{ if(i<b.length) finalCW.push(b[i]); });
+    const maxE=ecPer; for(let i=0;i<maxE;i++) blocksE.forEach(b=>finalCW.push(b[i]));
+    // to bit array
+    const outBits=[]; finalCW.forEach(b=>{ for(let i=7;i>=0;i--) outBits.push((b>>i)&1); });
+    for(let i=0;i<REM[v];i++) outBits.push(0);
+
+    // matrix
+    const size=17+v*4;
+    const m=Array.from({length:size},()=>new Array(size).fill(null)); // null=unset
+    const res=Array.from({length:size},()=>new Array(size).fill(false)); // reserved (function)
+    const setF=(r,c,val)=>{ m[r][c]=val?1:0; res[r][c]=true; };
+    const finder=(r,c)=>{ for(let i=-1;i<=7;i++) for(let j=-1;j<=7;j++){ const rr=r+i,cc=c+j; if(rr<0||cc<0||rr>=size||cc>=size) continue;
+      const inb=(i>=0&&i<=6&&(j===0||j===6))||(j>=0&&j<=6&&(i===0||i===6))||(i>=2&&i<=4&&j>=2&&j<=4);
+      setF(rr,cc,inb); } };
+    finder(0,0); finder(0,size-7); finder(size-7,0);
+    // timing
+    for(let i=8;i<size-8;i++){ if(!res[6][i]) setF(6,i,i%2===0); if(!res[i][6]) setF(i,6,i%2===0); }
+    // alignment
+    const ap=ALIGN[v];
+    for(const r of ap) for(const c of ap){
+      if((r<=7&&c<=7)||(r<=7&&c>=size-8)||(r>=size-8&&c<=7)) continue;
+      for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){ const inb=Math.max(Math.abs(i),Math.abs(j))!==1; setF(r+i,c+j,inb); }
+    }
+    // dark module
+    setF(size-8,8,true);
+    // reserve format areas
+    for(let i=0;i<9;i++){ if(!res[8][i]&&i!==6){ res[8][i]=true; } if(!res[i][8]&&i!==6){ res[i][8]=true; } }
+    for(let i=0;i<8;i++){ res[8][size-1-i]=true; res[size-1-i][8]=true; }
+    res[8][8]=true;
+    // reserve version info (v>=7) — none for v<=6; v7..20 need it
+    if(v>=7){ for(let i=0;i<6;i++) for(let j=0;j<3;j++){ res[i][size-11+j]=true; res[size-11+j][i]=true; } }
+
+    // place data
+    let bi=0, dir=-1, col=size-1;
+    while(col>0){ if(col===6) col--;
+      for(let n=0;n<size;n++){ const row=dir<0?(size-1-n):n;
+        for(let k=0;k<2;k++){ const cc=col-k;
+          if(res[row][cc]) continue;
+          let bit=bi<outBits.length?outBits[bi++]:0; m[row][cc]=bit; }
+      }
+      dir=-dir; col-=2;
+    }
+    // masks
+    const maskFn=[
+      (r,c)=>(r+c)%2===0, (r,c)=>r%2===0, (r,c)=>c%3===0, (r,c)=>(r+c)%3===0,
+      (r,c)=>(((r>>1)+(Math.floor(c/3)))%2)===0, (r,c)=>((r*c)%2+(r*c)%3)===0,
+      (r,c)=>(((r*c)%2+(r*c)%3)%2)===0, (r,c)=>(((r+c)%2+(r*c)%3)%2)===0
+    ];
+    function fmtBits(mask){ // level L=01
+      const data=(0b01<<3)|mask; let d=data<<10; const g=0b10100110111;
+      let rem=d; for(let i=14;i>=10;i--){ if((rem>>i)&1) rem^=g<<(i-10); }
+      let bits=((data<<10)|rem)^0b101010000010010; return bits;
+    }
+    function verBits(v){ let d=v<<12; const g=0b1111100100101; let rem=d;
+      for(let i=17;i>=12;i--){ if((rem>>i)&1) rem^=g<<(i-12); } return (v<<12)|rem; }
+    function applyFmt(mat,mask){ const b=fmtBits(mask);
+      for(let i=0;i<=5;i++) mat[8][i]=(b>>i)&1; mat[8][7]=(b>>6)&1; mat[8][8]=(b>>7)&1; mat[7][8]=(b>>8)&1;
+      for(let i=9;i<=14;i++) mat[14-i][8]=(b>>i)&1;
+      for(let i=0;i<=7;i++) mat[size-1-i][8]=(b>>i)&1;
+      for(let i=8;i<=14;i++) mat[8][size-15+i]=(b>>i)&1;
+      mat[size-8][8]=1;
+      if(v>=7){ const vb=verBits(v);
+        for(let i=0;i<18;i++){ const bit=(vb>>i)&1; const r=Math.floor(i/3), c=i%3;
+          mat[r][size-11+c]=bit; mat[size-11+c][r]=bit; } }
+    }
+    function penalty(mat){
+      let p=0;
+      for(let r=0;r<size;r++){ let run=1; for(let c=1;c<size;c++){ if(mat[r][c]===mat[r][c-1]) run++; else { if(run>=5) p+=3+(run-5); run=1; } } if(run>=5) p+=3+(run-5); }
+      for(let c=0;c<size;c++){ let run=1; for(let r=1;r<size;r++){ if(mat[r][c]===mat[r-1][c]) run++; else { if(run>=5) p+=3+(run-5); run=1; } } if(run>=5) p+=3+(run-5); }
+      for(let r=0;r<size-1;r++) for(let c=0;c<size-1;c++){ const v0=mat[r][c]; if(v0===mat[r][c+1]&&v0===mat[r+1][c]&&v0===mat[r+1][c+1]) p+=3; }
+      const pat=[1,0,1,1,1,0,1];
+      const check=(arr)=>{ let cnt=0; for(let i=0;i+11<=arr.length;i++){ let ok1=true,ok2=true;
+        for(let k=0;k<7;k++){ if(arr[i+k]!==pat[k]){ok1=false;} if(arr[i+4+k]!==pat[k]){ok2=false;} }
+        // 4 light + pattern OR pattern + 4 light
+        let a=true; for(let k=0;k<4;k++) if(arr[i+k]!==0) a=false; for(let k=0;k<7;k++) if(arr[i+4+k]!==pat[k]) a=false;
+        let b=true; for(let k=0;k<7;k++) if(arr[i+k]!==pat[k]) b=false; for(let k=0;k<4;k++) if(arr[i+7+k]!==0) b=false;
+        if(a||b) cnt++; } return cnt; };
+      for(let r=0;r<size;r++){ p+=40*check(mat[r]); }
+      for(let c=0;c<size;c++){ const col=[]; for(let r=0;r<size;r++) col.push(mat[r][c]); p+=40*check(col); }
+      let dark=0; for(let r=0;r<size;r++) for(let c=0;c<size;c++) dark+=mat[r][c]; const pct=dark*100/(size*size);
+      p+=10*Math.floor(Math.abs(pct-50)/5);
+      return p;
+    }
+    let best=null, bestMask=0, bestP=Infinity;
+    for(let mask=0;mask<8;mask++){
+      const mat=m.map((row,r)=>row.map((v2,c)=>{ let val=v2; if(!res[r][c]) val = (val^(maskFn[mask](r,c)?1:0)); return val; }));
+      applyFmt(mat,mask);
+      const p=penalty(mat);
+      if(p<bestP){ bestP=p; best=mat; bestMask=mask; }
+    }
+    return { size, matrix: best.map(row=>row.map(v=>!!v)) };
+  }
+  (root||this).QR={ encode };
+})(typeof window!=="undefined"?window:this);
+
+/* ===== engine (identical to tested engine3.js) ===== */
+/* ===== CASSANOVA Clash engine v3 =====
+   protocols: vless vmess trojan ss ssr hysteria2 hysteria tuic anytls socks (+ Clash-YAML ingest)
+   features: uTLS fingerprint, lazy/expected-status, always-on sniffer, rule profiles,
+             DNS respect-rules, provider output, advanced settings */
 
 function b64(s){
   let x=String(s).trim().replace(/-/g,"+").replace(/_/g,"/").replace(/\s/g,"");
@@ -350,10 +564,12 @@ function b64(s){
   const bin=(typeof atob==="function")?atob(x):Buffer.from(x,"base64").toString("binary");
   try{ return decodeURIComponent(escape(bin)); }catch(e){ return bin; }
 }
+function b64try(s){ try{ return b64(s); }catch(e){ return ""; } }
 function blank(){ return { net:"",sec:"",sni:"",host:"",path:"",service:"",alpn:"",flow:"",pbk:"",sid:"",scy:"auto",aid:0,
-  cipher:"",plugin:"",pluginOpts:null,insecure:false,obfs:"",obfsPass:"",up:"",down:"",ports:"",
-  uuid:"",token:"",cc:"",urm:"",disableSni:false }; }
+  fp:"",pkt:"",cipher:"",plugin:"",pluginOpts:null,insecure:false,obfs:"",obfsPass:"",up:"",down:"",ports:"",
+  uuid:"",token:"",cc:"",urm:"",disableSni:"",protocol:"",protoParam:"",obfsParam:"",username:"",_clash:null }; }
 
+function qp(u,k){ return u.searchParams.get(k); }
 function parseStd(uri, proto){
   const h=uri.indexOf("#");
   const remark=h>-1?decodeURIComponent(uri.slice(h+1)):"";
@@ -371,7 +587,8 @@ function parseStd(uri, proto){
     sni:q.get("sni")||q.get("peer")||"", host:q.get("host")||"",
     path:q.get("path")||"", service:q.get("serviceName")||q.get("servicename")||"",
     alpn:q.get("alpn")||"", flow:q.get("flow")||"",
-    pbk:q.get("pbk")||"", sid:q.get("sid")||"" });
+    pbk:q.get("pbk")||"", sid:q.get("sid")||"",
+    fp:q.get("fp")||q.get("fingerprint")||"", pkt:q.get("packetEncoding")||q.get("packet_encoding")||"" });
   return a;
 }
 function parseVmess(uri){
@@ -383,10 +600,10 @@ function parseVmess(uri){
   const a=blank();
   Object.assign(a,{ proto:"vmess", remark:o.ps||"", server:o.add,
     port:parseInt(o.port||(tls==="tls"?443:80),10), cred:o.id,
-    net:net==="h2"?"http":net, sec:tls==="tls"?"tls":"none",
+    net:net==="h2"?"http":net, sec:(tls==="tls"||tls==="reality")?"tls":"none",
     sni:o.sni||"", host:o.host||"", path:o.path||"",
     service:net==="grpc"?(o.path||""):"", alpn:o.alpn||"",
-    scy:(o.scy||"auto").toLowerCase(), aid:parseInt(o.aid||0,10) });
+    fp:o.fp||"", scy:(o.scy||"auto").toLowerCase(), aid:parseInt(o.aid||0,10) });
   return a;
 }
 function parseSS(uri){
@@ -427,13 +644,31 @@ function parseSS(uri){
   }
   return a;
 }
+function parseSSR(uri){
+  const raw=uri.replace(/^ssr:\/\//i,"");
+  const dec=b64(raw.split("#")[0]);
+  // host:port:protocol:method:obfs:base64url(password)/?params
+  const qi=dec.indexOf("/?");
+  const main=qi>-1?dec.slice(0,qi):dec;
+  const params=qi>-1?dec.slice(qi+2):"";
+  const parts=main.split(":");
+  if(parts.length<6) throw new Error("format SSR tidak terbaca");
+  const host=parts[0], port=parts[1], protocol=parts[2], method=parts[3], obfs=parts[4], passB64=parts.slice(5).join(":");
+  const q=new URLSearchParams(params);
+  const g=k=>{ const v=q.get(k); return v?b64try(v):""; };
+  const a=blank();
+  Object.assign(a,{ proto:"ssr", remark:g("remarks"), server:host, port:parseInt(port,10),
+    cred:b64try(passB64), cipher:method, protocol, obfs,
+    protoParam:g("protoparam"), obfsParam:g("obfsparam") });
+  if(!a.server||!a.port) throw new Error("alamat SSR kosong");
+  return a;
+}
 function parseHy2(uri){
   const h=uri.indexOf("#");
   const remark=h>-1?decodeURIComponent(uri.slice(h+1)):"";
   const u=new URL((h>-1?uri.slice(0,h):uri).replace(/^(hysteria2|hy2):\/\//i,"http://"));
   const q=u.searchParams;
-  let auth=decodeURIComponent(u.username||"");
-  if(u.password) auth+=":"+decodeURIComponent(u.password);
+  let auth=decodeURIComponent(u.username||""); if(u.password) auth+=":"+decodeURIComponent(u.password);
   if(!u.hostname) throw new Error("alamat Hysteria2 kosong");
   if(!auth) throw new Error("password Hysteria2 kosong");
   const a=blank();
@@ -443,6 +678,21 @@ function parseHy2(uri){
     obfs:q.get("obfs")||"", obfsPass:q.get("obfs-password")||q.get("obfs_password")||"",
     alpn:q.get("alpn")||"", up:q.get("up")||q.get("upmbps")||"", down:q.get("down")||q.get("downmbps")||"",
     ports:q.get("mport")||q.get("ports")||"" });
+  return a;
+}
+function parseHy1(uri){
+  const h=uri.indexOf("#");
+  const remark=h>-1?decodeURIComponent(uri.slice(h+1)):"";
+  const u=new URL((h>-1?uri.slice(0,h):uri).replace(/^hysteria:\/\//i,"http://"));
+  const q=u.searchParams;
+  if(!u.hostname) throw new Error("alamat Hysteria kosong");
+  const a=blank();
+  Object.assign(a,{ proto:"hysteria", remark, server:u.hostname, port:parseInt(u.port||"443",10), sec:"tls",
+    cred:q.get("auth")||q.get("auth_str")||q.get("authStr")||decodeURIComponent(u.username||""),
+    sni:q.get("peer")||q.get("sni")||"", alpn:q.get("alpn")||"",
+    up:q.get("up")||q.get("upmbps")||"", down:q.get("down")||q.get("downmbps")||"",
+    obfs:q.get("obfs")||"", protocol:q.get("protocol")||"udp",
+    insecure:/^(1|true)$/i.test(q.get("insecure")||"") });
   return a;
 }
 function parseTuic(uri){
@@ -460,7 +710,37 @@ function parseTuic(uri){
     cc:q.get("congestion_control")||q.get("congestion-controller")||"bbr",
     urm:q.get("udp_relay_mode")||q.get("udp-relay-mode")||"native",
     insecure:/^(1|true)$/i.test(q.get("allow_insecure")||q.get("insecure")||q.get("allowInsecure")||""),
-    disableSni:/^(1|true)$/i.test(q.get("disable_sni")||q.get("disable-sni")||"") });
+    disableSni:/^(1|true)$/i.test(q.get("disable_sni")||q.get("disable-sni")||"")?true:"" });
+  return a;
+}
+function parseAnyTLS(uri){
+  const h=uri.indexOf("#");
+  const remark=h>-1?decodeURIComponent(uri.slice(h+1)):"";
+  const u=new URL((h>-1?uri.slice(0,h):uri).replace(/^anytls:\/\//i,"http://"));
+  const q=u.searchParams;
+  const pass=decodeURIComponent(u.username||"")+(u.password?":"+decodeURIComponent(u.password):"");
+  if(!u.hostname) throw new Error("alamat AnyTLS kosong");
+  if(!pass) throw new Error("password AnyTLS kosong");
+  const a=blank();
+  Object.assign(a,{ proto:"anytls", remark, server:u.hostname, port:parseInt(u.port||"443",10), sec:"tls", cred:pass,
+    sni:q.get("sni")||q.get("peer")||"", alpn:q.get("alpn")||"",
+    insecure:/^(1|true)$/i.test(q.get("insecure")||q.get("allowInsecure")||"") });
+  return a;
+}
+function parseSocks(uri){
+  const h=uri.indexOf("#");
+  const remark=h>-1?decodeURIComponent(uri.slice(h+1)):"";
+  let body=(h>-1?uri.slice(0,h):uri).replace(/^socks5?:\/\//i,"");
+  let user="",pass="";
+  if(body.includes("@")){
+    let ui=body.slice(0,body.lastIndexOf("@")); body=body.slice(body.lastIndexOf("@")+1);
+    ui=decodeURIComponent(ui); if(!ui.includes(":")) ui=b64try(ui)||ui;
+    const ci=ui.indexOf(":"); if(ci>-1){ user=ui.slice(0,ci); pass=ui.slice(ci+1); }
+  }
+  const c=body.lastIndexOf(":"); const server=body.slice(0,c), port=body.slice(c+1);
+  if(!server||!port) throw new Error("alamat SOCKS kosong");
+  const a=blank();
+  Object.assign(a,{ proto:"socks5", remark, server, port:parseInt(port,10), username:user, cred:pass });
   return a;
 }
 function parseOne(l){
@@ -468,27 +748,162 @@ function parseOne(l){
   if(/^vmess:\/\//i.test(u)) return parseVmess(u);
   if(/^vless:\/\//i.test(u)) return parseStd(u,"vless");
   if(/^trojan:\/\//i.test(u)) return parseStd(u,"trojan");
+  if(/^ssr:\/\//i.test(u)) return parseSSR(u);
   if(/^ss:\/\//i.test(u)) return parseSS(u);
   if(/^(hysteria2|hy2):\/\//i.test(u)) return parseHy2(u);
+  if(/^hysteria:\/\//i.test(u)) return parseHy1(u);
   if(/^tuic:\/\//i.test(u)) return parseTuic(u);
+  if(/^anytls:\/\//i.test(u)) return parseAnyTLS(u);
+  if(/^socks5?:\/\//i.test(u)) return parseSocks(u);
   throw new Error("awalan link tidak dikenal");
 }
-const PREFIX=/^(vless|vmess|trojan|ss|hysteria2|hy2|tuic):\/\//i;
-const PREFIX_G=/(vless|vmess|trojan|ss|hysteria2|hy2|tuic):\/\//i;
-function expand(text){
+const PREFIX=/^(vless|vmess|trojan|ssr|ss|hysteria2|hy2|hysteria|tuic|anytls|socks5?):\/\//i;
+const PREFIX_G=/(vless|vmess|trojan|ssr|ss|hysteria2|hy2|hysteria|tuic|anytls|socks5?):\/\//i;
+
+/* ---- Clash YAML ingest (mini YAML parser) ---- */
+function yamlParse(text){
+  const lines=[];
+  text.replace(/\t/g,"  ").split(/\r?\n/).forEach(raw=>{
+    if(/^\s*#/.test(raw) || /^\s*$/.test(raw)) return;
+    // strip trailing comment outside quotes
+    let s=raw, out="", q=0;
+    for(let i=0;i<s.length;i++){ const c=s[i];
+      if(c==='"'&&q!==2){ q=q?0:1; } else if(c==="'"&&q!==1){ q=q?0:2; }
+      if(c==="#"&&!q&&i>0&&/\s/.test(s[i-1])){ break; } out+=c; }
+    lines.push(out.replace(/\s+$/,""));
+  });
+  // join multi-line flow ({...}/[...]) into single logical lines
+  (function(){
+    const depthOf=(s,st)=>{ let d=st,q=0; for(let i=0;i<s.length;i++){ const c=s[i];
+      if(c==='"'&&q!==2) q=q?0:1; else if(c==="'"&&q!==1) q=q?0:2;
+      if(!q){ if(c==="{"||c==="[") d++; else if(c==="}"||c==="]") d--; } } return d; };
+    const merged=[]; let i=0;
+    while(i<lines.length){ let cur=lines[i], d=depthOf(cur,0);
+      while(d>0 && i+1<lines.length){ i++; cur+=" "+lines[i].trim(); d=depthOf(cur,0); }
+      merged.push(cur); i++; }
+    lines.length=0; merged.forEach(x=>lines.push(x));
+  })();
+  let idx=0;
+  const indentOf=s=>s.match(/^ */)[0].length;
+  const isKey=s=>/^((?:"(?:[^"\\]|\\.)*")|(?:'[^']*')|[^:#\s][^:]*):(\s|$)/.test(s);
+  function parse(min){
+    if(idx>=lines.length) return null;
+    const ind=indentOf(lines[idx]);
+    if(ind<min) return null;
+    const t0=lines[idx].trim();
+    if(t0[0]==="{"||t0[0]==="["){ idx++; return scalarOrFlow(t0); }
+    if(t0==="-"||t0.startsWith("- ")) return parseSeq(ind);
+    if(isKey(t0)) return parseMap(ind);
+    idx++; return scalarOrFlow(t0);
+  }
+  function parseSeq(ind){
+    const arr=[];
+    while(idx<lines.length){
+      const l=lines[idx], li=indentOf(l), t=l.trim();
+      if(li<ind || !(t==="-"||t.startsWith("- "))) break;
+      const rest=t==="-"?"":t.slice(2);
+      if(rest===""){ idx++; arr.push(parse(ind+1)); }
+      else if(rest[0]==="{"||rest[0]==="["){ idx++; arr.push(scalarOrFlow(rest)); }
+      else if(isKey(rest)){ lines[idx]=" ".repeat(ind+2)+rest; arr.push(parseMap(ind+2)); }
+      else { idx++; arr.push(scalarOrFlow(rest)); }
+    }
+    return arr;
+  }
+  function parseMap(ind){
+    const obj={};
+    while(idx<lines.length){
+      const l=lines[idx], li=indentOf(l), t=l.trim();
+      if(li<ind) break;
+      if(li>ind){ idx++; continue; }
+      if(t==="-"||t.startsWith("- ")) break;
+      const m=/^((?:"(?:[^"\\]|\\.)*")|(?:'[^']*')|[^:]+?):(?:\s+([\s\S]*))?$/.exec(t);
+      if(!m){ idx++; continue; }
+      const key=scalar(m[1].trim()); let val=m[2];
+      idx++;
+      if(val===undefined||val===""){
+        const ni = idx<lines.length? indentOf(lines[idx]) : -1;
+        const nt = idx<lines.length? lines[idx].trim() : "";
+        if(ni>=ind && (nt==="-"||nt.startsWith("- "))) obj[key]=parseSeq(ni);
+        else if(ni>ind) obj[key]=parse(ind+1);
+        else obj[key]=null;
+      } else obj[key]=scalarOrFlow(val);
+    }
+    return obj;
+  }
+  function scalarOrFlow(s){ s=s.trim();
+    if(s[0]==="{") return flowMap(s);
+    if(s[0]==="[") return flowSeq(s);
+    return scalar(s);
+  }
+  function splitTop(s){ // split by comma at depth 0 (s without outer brackets)
+    const res=[]; let d=0,q=0,cur="";
+    for(let i=0;i<s.length;i++){ const c=s[i];
+      if(c==='"'&&q!==2) q=q?0:1; else if(c==="'"&&q!==1) q=q?0:2;
+      if(!q){ if(c==="{"||c==="[") d++; else if(c==="}"||c==="]") d--;
+        if(c===","&&d===0){ res.push(cur); cur=""; continue; } }
+      cur+=c; }
+    if(cur.trim()!=="") res.push(cur);
+    return res;
+  }
+  function flowMap(s){ s=s.trim().replace(/^\{/,"").replace(/\}$/,"");
+    const o={}; splitTop(s).forEach(pair=>{
+      const ci=findColon(pair); if(ci<0) return;
+      o[scalar(pair.slice(0,ci).trim())]=scalarOrFlow(pair.slice(ci+1).trim()); });
+    return o;
+  }
+  function flowSeq(s){ s=s.trim().replace(/^\[/,"").replace(/\]$/,"");
+    return splitTop(s).map(x=>scalarOrFlow(x.trim())); }
+  function findColon(s){ let q=0,d=0;
+    for(let i=0;i<s.length;i++){ const c=s[i];
+      if(c==='"'&&q!==2) q=q?0:1; else if(c==="'"&&q!==1) q=q?0:2;
+      if(!q){ if(c==="{"||c==="[") d++; else if(c==="}"||c==="]") d--; if(c===":"&&d===0) return i; } }
+    return -1;
+  }
+  function scalar(s){ s=s.trim();
+    if(s==="") return "";
+    if(s[0]==='"') return s.slice(1,-1).replace(/\\"/g,'"').replace(/\\\\/g,"\\");
+    if(s[0]==="'") return s.slice(1,-1).replace(/''/g,"'");
+    if(/^(true|false)$/i.test(s)) return /^true$/i.test(s);
+    if(/^(null|~)$/i.test(s)) return null;
+    if(/^-?\d+$/.test(s)) return parseInt(s,10);
+    if(/^-?\d+\.\d+$/.test(s)) return parseFloat(s);
+    return s;
+  }
+  return parse(0);
+}
+function ingestClash(text){
+  const doc=yamlParse(text);
+  let list=null;
+  if(doc && Array.isArray(doc.proxies)) list=doc.proxies;
+  else if(Array.isArray(doc)) list=doc;
+  if(!list) return [];
   const out=[];
-  text.split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean).forEach(l=>{
-    if(PREFIX.test(l)){ out.push(l); return; }
-    try{
-      const d=b64(l);
-      if(PREFIX_G.test(d)){
-        d.split(/[\r\n\s]+/).map(s=>s.trim()).filter(Boolean).forEach(x=>out.push(x));
-        return;
-      }
-    }catch(e){}
-    out.push(l);
+  list.forEach(p=>{
+    if(!p||typeof p!=="object"||!p.type||!p.server) return;
+    const a=blank();
+    a.proto=String(p.type).toLowerCase(); a.server=String(p.server);
+    a.port=parseInt(p.port,10)||0; a.remark=p.name||""; a.sec=(p.tls||p.type==="trojan"||p.type==="hysteria2"||p.type==="tuic")?"tls":"";
+    a.cred=p.password||p.uuid||p.auth||p.cred||""; a.uuid=p.uuid||""; a.net=(p.network||"").toLowerCase();
+    a._clash=p;
+    out.push(a);
   });
   return out;
+}
+
+function expand(text){
+  const t=text||"";
+  // whole-body Clash YAML?
+  if(/^\s*(proxies|proxy-providers|port|mixed-port|proxy-groups)\s*:/m.test(t) && /\n\s*-\s*\{?\s*name\s*:/m.test(t)){
+    return { clash:true, text:t };
+  }
+  const out=[];
+  t.split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean).forEach(l=>{
+    if(PREFIX.test(l)){ out.push(l); return; }
+    const d=b64try(l);
+    if(d && PREFIX_G.test(d)){ d.split(/[\r\n\s]+/).map(s=>s.trim()).filter(Boolean).forEach(x=>out.push(x)); return; }
+    out.push(l);
+  });
+  return { clash:false, lines:out };
 }
 
 const FLAGS=[["🇸🇬",["singapore","singapura","sgp","sin","sg"]],["🇮🇩",["indonesia","jakarta","surabaya","jkt","sby","idn"]],
@@ -504,22 +919,26 @@ function detectFlag(a, fallback){
   return fallback;
 }
 function kindOf(a){
-  if(a.proto==="vless") return (a.sec==="tls"||a.sec==="reality")?"TLS":"NTLS";
+  if(a.proto==="vless") return (a.sec==="tls"||a.sec==="reality"||(a._clash&&a._clash.tls))?"TLS":"NTLS";
   if(a.proto==="vmess") return "VMESS";
   if(a.proto==="trojan") return "TRJ";
   if(a.proto==="ss") return "SS";
+  if(a.proto==="ssr") return "SSR";
   if(a.proto==="hysteria2") return "HY2";
+  if(a.proto==="hysteria") return "HY1";
   if(a.proto==="tuic") return "TUIC";
+  if(a.proto==="anytls") return "ATLS";
+  if(a.proto==="socks5"||a.proto==="http") return "SOCKS";
   return "OTH";
 }
 function label(a){
   let s=(a.remark||a.host||a.sni||a.server).replace(/[\u0000-\u001f"\\]/g,"").trim();
-  s=s.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu,"").replace(/^(TLS|NTLS|VMESS|TRJ|SS|HY2|TUIC)[\s\-–]*\d*\s*/i,"").trim();
+  s=s.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu,"").replace(/^(TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)[\s\-–]*\d*\s*/i,"").trim();
   return (s||a.server).slice(0,24);
 }
-function fp(a){ return [a.proto,a.server,a.port,a.cred,a.uuid,a.token,a.cipher,a.sec,a.net,a.host,a.sni,a.path,a.service].join("|"); }
+function fp(a){ return [a.proto,a.server,a.port,a.cred,a.uuid,a.token,a.cipher,a.sec,a.net,a.host,a.sni,a.path,a.service,a._clash?JSON.stringify(a._clash):""].join("|"); }
 
-/* ---- Clash proxy builder ---- */
+/* ---- proxy builders ---- */
 function clean(o){ if(!o) return o; const r={}; Object.keys(o).forEach(k=>{ if(o[k]!==undefined) r[k]=o[k]; }); return r; }
 function buildWs(a){
   let path=a.path||"/", ed=0;
@@ -531,14 +950,22 @@ function buildWs(a){
 }
 function alpnArr(s){ const al=String(s||"").split(",").map(x=>x.trim()).filter(Boolean); return al.length?al:null; }
 
-function proxyOf(a, name, ins){
-  // --- Shadowsocks ---
+function proxyOf(a, name, o){
+  const ins=o.ins;
+  if(a._clash){ const p=Object.assign({},a._clash); p.name=name; return p; }
+
   if(a.proto==="ss"){
     const p={ name, type:"ss", server:a.server, port:a.port, cipher:a.cipher, password:a.cred, udp:true };
     if(a.plugin){ p.plugin=a.plugin; const po=clean(a.pluginOpts); if(po&&Object.keys(po).length) p["plugin-opts"]=po; }
     return p;
   }
-  // --- Hysteria2 ---
+  if(a.proto==="ssr"){
+    const p={ name, type:"ssr", server:a.server, port:a.port, cipher:a.cipher||"none", password:a.cred,
+      protocol:a.protocol||"origin", obfs:a.obfs||"plain", udp:true };
+    if(a.protoParam) p["protocol-param"]=a.protoParam;
+    if(a.obfsParam) p["obfs-param"]=a.obfsParam;
+    return p;
+  }
   if(a.proto==="hysteria2"){
     const p={ name, type:"hysteria2", server:a.server, password:a.cred };
     if(a.ports){ p.ports=a.ports; p["hop-interval"]="30s"; } else { p.port=a.port; }
@@ -549,22 +976,47 @@ function proxyOf(a, name, ins){
     if(a.up) p.up=a.up; if(a.down) p.down=a.down;
     return p;
   }
-  // --- TUIC ---
+  if(a.proto==="hysteria"){
+    const p={ name, type:"hysteria", server:a.server, port:a.port };
+    if(a.cred) p["auth-str"]=a.cred;
+    p.sni=a.sni||a.server;
+    if(ins||a.insecure) p["skip-cert-verify"]=true;
+    if(a.up) p.up=a.up; if(a.down) p.down=a.down;
+    if(a.obfs) p.obfs=a.obfs;
+    if(a.protocol && a.protocol!=="udp") p.protocol=a.protocol;
+    const al=alpnArr(a.alpn); if(al) p.alpn=al;
+    return p;
+  }
   if(a.proto==="tuic"){
     const p={ name, type:"tuic", server:a.server, port:a.port };
     if(a.token){ p.token=a.token; } else { p.uuid=a.uuid; p.password=a.cred; }
     p.sni=a.sni||a.server;
-    const al=alpnArr(a.alpn)||["h3"]; p.alpn=al;
+    p.alpn=alpnArr(a.alpn)||["h3"];
     p["congestion-controller"]=a.cc||"bbr";
     p["udp-relay-mode"]=a.urm||"native";
     if(ins||a.insecure) p["skip-cert-verify"]=true;
-    if(a.disableSni) p["disable-sni"]=true;
+    if(a.disableSni===true) p["disable-sni"]=true;
     return p;
   }
-  // --- VLESS / VMess / Trojan ---
+  if(a.proto==="anytls"){
+    const p={ name, type:"anytls", server:a.server, port:a.port, password:a.cred, udp:true };
+    p.sni=a.sni||a.server;
+    if(ins||a.insecure) p["skip-cert-verify"]=true;
+    const al=alpnArr(a.alpn); if(al) p.alpn=al;
+    if(o.fp) p["client-fingerprint"]=a.fp||o.fp;
+    return p;
+  }
+  if(a.proto==="socks5"){
+    const p={ name, type:"socks5", server:a.server, port:a.port, udp:true };
+    if(a.username) p.username=a.username;
+    if(a.cred) p.password=a.cred;
+    return p;
+  }
+
+  // vless / vmess / trojan
   const tls=(a.sec==="tls"||a.sec==="reality");
   const p={ name, type:a.proto, server:a.server, port:a.port };
-  if(a.proto==="vless"){ p.uuid=a.cred; }
+  if(a.proto==="vless"){ p.uuid=a.cred; if(a.pkt) p["packet-encoding"]=a.pkt; }
   else if(a.proto==="vmess"){
     p.uuid=a.cred; p.alterId=a.aid||0;
     p.cipher=["auto","none","zero","aes-128-gcm","chacha20-poly1305"].includes(a.scy)?a.scy:"auto";
@@ -575,13 +1027,15 @@ function proxyOf(a, name, ins){
     p.sni=a.sni||a.host||a.server;
     if(ins) p["skip-cert-verify"]=true;
     const al=alpnArr(a.alpn); if(al) p.alpn=al;
+    if(a.fp) p["client-fingerprint"]=a.fp;
   } else if(tls){
     p.tls=true;
     p.servername=a.sni||a.host||a.server;
     if(ins) p["skip-cert-verify"]=true;
     const al=alpnArr(a.alpn); if(al) p.alpn=al;
+    if(a.fp) p["client-fingerprint"]=a.fp;
     if(a.sec==="reality"){
-      p["client-fingerprint"]="chrome";
+      if(!a.fp) p["client-fingerprint"]="chrome";
       p["reality-opts"]={ "public-key":a.pbk, "short-id":a.sid };
     }
   }
@@ -598,24 +1052,35 @@ function proxyOf(a, name, ins){
   return p;
 }
 
-/* ---- groups / rules / full config ---- */
+/* ---- config build ---- */
 const SPEED={ fast:{interval:20,tolerance:5}, mid:{interval:60,tolerance:50}, slow:{interval:300,tolerance:50} };
 const GNAME=["🎯 Primary Group","🎯 Backup Group","🎯 Tertiary Group","🎯 Quartet Group"];
 const KIND={ TLS:"🔒 Auto VLESS TLS", NTLS:"🔓 Auto VLESS NTLS", VMESS:"🛡️ Auto VMess", TRJ:"🐴 Auto Trojan",
-  SS:"🧦 Auto SS", HY2:"🚄 Auto Hysteria2", TUIC:"🚀 Auto TUIC" };
-const KORDER=["TLS","NTLS","VMESS","TRJ","SS","HY2","TUIC"];
+  SS:"🧦 Auto SS", SSR:"🧦 Auto SSR", HY2:"🚄 Auto Hysteria2", HY1:"🚅 Auto Hysteria", TUIC:"🚀 Auto TUIC",
+  ATLS:"🔐 Auto AnyTLS", SOCKS:"🧩 Auto SOCKS", OTH:"📦 Auto Lainnya" };
+const KORDER=["TLS","NTLS","VMESS","TRJ","SS","SSR","HY2","HY1","TUIC","ATLS","SOCKS","OTH"];
 const QDOM=["googlevideo.com","youtube.com","youtu.be","ytimg.com","tiktokcdn.com","tiktokv.com",
   "tiktok.com","facebook.com","fbcdn.net","instagram.com","cdninstagram.com"];
-const DEV={
-  hp:{ ctrl:"127.0.0.1:9090", lan:false, bind:"*" },
-  router:{ ctrl:"0.0.0.0:9090", lan:true, bind:"*" }
-};
+const LOCAL_ID=["go.id","mil.id","ac.id","bca.co.id","klikbca.com","bri.co.id","bankmandiri.co.id","bni.co.id",
+  "dana.id","gopay.co.id","gojek.com","ovo.id","shopee.co.id","tokopedia.com","blibli.com","linkaja.id","jenius.com"];
+const TESTURL={ gstatic:"http://www.gstatic.com/generate_204", cloudflare:"https://cp.cloudflare.com/generate_204",
+  apple:"http://captive.apple.com/generate_204" };
+const DEV={ hp:{ ctrl:"127.0.0.1:9090", lan:false, bind:"*" }, router:{ ctrl:"0.0.0.0:9090", lan:true, bind:"*" } };
 const G={ PROXY:"🚀 Proxy", BEST:"♻️ Best Ping", LB:"⚖️ Load Balance", FB:"🔁 Fallback",
   GLOBAL:"🌐 Global", ADB:"🛑 AdBlock" };
 
 function build(accs, o, override){
+  o=o||{};
   const sp=SPEED[o.spd]||SPEED.slow;
   const dev=DEV[o.dev]||DEV.hp;
+  const port=parseInt(o.port,10)||7890;
+  const secret=o.secret||"";
+  const ipv6=!!o.ipv6;
+  const stack=["mixed","gvisor","system"].includes(o.tunstack)?o.tunstack:"mixed";
+  const lbstrat=["consistent-hashing","round-robin","sticky-sessions"].includes(o.lbstrategy)?o.lbstrategy:"consistent-hashing";
+  const testurl=TESTURL[o.testurl]||TESTURL.gstatic;
+  const gfp=(o.fp===undefined)?"chrome":o.fp;
+  const ruleFull=o.ruleset==="full";
 
   const names=[], proxies=[], used={}, cnt={};
   accs.forEach((a,i)=>{
@@ -624,19 +1089,18 @@ function build(accs, o, override){
     let name=(override && override[i]) ? override[i]
       : k+"-"+String(cnt[k]).padStart(2,"0")+" "+(flag?flag+" ":"")+label(a);
     while(used[name]) name+="·";
-    used[name]=1; names.push(name); proxies.push(proxyOf(a,name,o.ins));
+    used[name]=1; names.push(name); proxies.push(proxyOf(a,name,o));
   });
   build.tags=names;
 
   const groups=[];
   const urltest=(tag,list)=>({ name:tag, type:"url-test", proxies:list.slice(),
-    url:"https://www.gstatic.com/generate_204", interval:sp.interval, tolerance:sp.tolerance });
-
+    url:testurl, interval:sp.interval, tolerance:sp.tolerance, lazy:true, "expected-status":"204" });
   groups.push(urltest(G.BEST, names));
   groups.push({ name:G.LB, type:"load-balance", proxies:names.slice(),
-    url:"https://www.gstatic.com/generate_204", interval:sp.interval, strategy:"consistent-hashing" });
+    url:testurl, interval:sp.interval, strategy:lbstrat, lazy:true, "expected-status":"204" });
   groups.push({ name:G.FB, type:"fallback", proxies:names.slice(),
-    url:"https://www.gstatic.com/generate_204", interval:sp.interval });
+    url:testurl, interval:sp.interval, lazy:true, "expected-status":"204" });
   groups.push({ name:G.GLOBAL, type:"select", proxies:names.concat(["DIRECT"]) });
 
   const splitNames=[];
@@ -665,50 +1129,55 @@ function build(accs, o, override){
   ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","127.0.0.0/8","100.64.0.0/10"].forEach(c=>rules.push("IP-CIDR,"+c+",DIRECT,no-resolve"));
   rules.push("IP-CIDR6,fc00::/7,DIRECT,no-resolve");
   rules.push("IP-CIDR6,::1/128,DIRECT,no-resolve");
+  if(ruleFull){
+    rules.push("GEOSITE,private,DIRECT");
+    LOCAL_ID.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
+    rules.push("DOMAIN-KEYWORD,stun,DIRECT");
+  }
   rules.push("DOMAIN-SUFFIX,id,DIRECT");
   if(o.adblock) rules.push("GEOSITE,category-ads-all,"+G.ADB);
+  if(ruleFull) rules.push("GEOIP,ID,DIRECT");
   if(o.quic==="video") QDOM.forEach(d=>rules.push("AND,((NETWORK,udp),(DST-PORT,443),(DOMAIN-SUFFIX,"+d+")),REJECT"));
   if(o.quic==="all") rules.push("AND,((NETWORK,udp),(DST-PORT,443)),REJECT");
   rules.push("MATCH,"+G.PROXY);
 
+  const dns={
+    enable:true, listen:"0.0.0.0:1053", ipv6:ipv6,
+    "enhanced-mode":"fake-ip", "fake-ip-range":"198.18.0.1/16",
+    "fake-ip-filter":["*.lan","*.local","+.id","+.msftconnecttest.com","+.msftncsi.com",
+      "time.*.com","time.*.gov","+.pool.ntp.org","+.push.apple.com","+.wns.windows.com","stun.*.*","stun.*.*.*"],
+    "respect-rules":true,
+    "default-nameserver":["8.8.8.8","1.1.1.1"],
+    nameserver:["https://1.1.1.1/dns-query","https://8.8.8.8/dns-query"],
+    "proxy-server-nameserver":["https://1.1.1.1/dns-query"]
+  };
+  if(ruleFull) dns["nameserver-policy"]={ "geosite:private":"system", "+.id":["https://1.1.1.1/dns-query"] };
+
   const cfg={
-    "mixed-port":7890,
+    "mixed-port":port,
     "allow-lan":dev.lan,
     "bind-address":dev.bind,
     mode:"rule",
     "log-level":"warning",
-    ipv6:false,
+    ipv6:ipv6,
     "external-controller":dev.ctrl,
-    secret:"",
+    secret:secret,
+    "global-client-fingerprint": gfp||undefined,
     profile:{ "store-selected":true, "store-fake-ip":true },
-    dns:{
-      enable:true,
-      listen:"0.0.0.0:1053",
-      ipv6:false,
-      "enhanced-mode":"fake-ip",
-      "fake-ip-range":"198.18.0.1/16",
-      "fake-ip-filter":["*.lan","*.local","+.id"],
-      "default-nameserver":["8.8.8.8","1.1.1.1"],
-      nameserver:["https://1.1.1.1/dns-query","https://8.8.8.8/dns-query"],
-      "proxy-server-nameserver":["https://1.1.1.1/dns-query"]
-    },
-    tun:{
-      enable:true, stack:"mixed", "auto-route":true, "auto-detect-interface":true,
-      "strict-route":true, "dns-hijack":["any:53"], mtu:1280
-    },
+    sniffer:{ enable:true, "force-dns-mapping":true, "parse-pure-ip":true, "override-destination":false,
+      sniff:{ HTTP:{ports:[80,8080]}, TLS:{ports:[443,8443]}, QUIC:{ports:[443]} },
+      "skip-domain":["Mihomo","+.push.apple.com"] },
+    dns:dns,
+    tun:{ enable:true, stack:stack, "auto-route":true, "auto-detect-interface":true,
+      "strict-route":true, "dns-hijack":["any:53","tcp://any:53"], mtu:1280 },
     proxies:proxies,
     "proxy-groups":[proxySel].concat(groups),
     rules:rules
   };
-  if(o.quic==="video"){
-    cfg.sniffer={ enable:true, "force-dns-mapping":true, "parse-pure-ip":true,
-      sniff:{ QUIC:{ ports:[443] }, TLS:{ ports:[443] }, HTTP:{ ports:[80,8080] } },
-      "override-destination":false };
-  }
   return cfg;
 }
 
-/* ---- block-style YAML dumper (proven round-trip-correct) ---- */
+/* ---- YAML dumper (proven round-trip-correct) ---- */
 function yamlDump(obj){
   const esc=s=>String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"');
   const isScalar=v=>v===null||["string","number","boolean"].includes(typeof v);
@@ -726,168 +1195,195 @@ function yamlDump(obj){
         if(isScalar(item)){ out+=pad(ind)+"- "+scalar(item)+"\n"; return; }
         if(Array.isArray(item)){ out+=pad(ind)+"-\n"+dump(item,ind+1); return; }
         const keys=Object.keys(item).filter(k=>item[k]!==undefined);
-        keys.forEach((k,i)=>{
-          const prefix = i===0 ? pad(ind)+"- " : pad(ind+1);
-          out+=emitKV(prefix, k, item[k], ind+1);
-        });
+        keys.forEach((k,i)=>{ const prefix=i===0?pad(ind)+"- ":pad(ind+1); out+=emitKV(prefix,k,item[k],ind+1); });
       });
     } else if(v && typeof v==="object"){
-      Object.keys(v).filter(k=>v[k]!==undefined).forEach(k=>{ out+=emitKV(pad(ind), k, v[k], ind); });
+      Object.keys(v).filter(k=>v[k]!==undefined).forEach(k=>{ out+=emitKV(pad(ind),k,v[k],ind); });
     }
     return out;
   }
-  function emitKV(prefix, k, val, childInd){
+  function emitKV(prefix,k,val,childInd){
     if(isScalar(val)) return prefix+k+": "+scalar(val)+"\n";
     if(Array.isArray(val) && val.length===0) return prefix+k+": []\n";
     if(val && typeof val==="object" && !Array.isArray(val) && Object.keys(val).filter(x=>val[x]!==undefined).length===0)
       return prefix+k+": {}\n";
-    return prefix+k+":\n"+dump(val, childInd+1);
+    return prefix+k+":\n"+dump(val,childInd+1);
   }
   return dump(obj,0);
 }
-/* ========== DOM glue ========== */
+
+function emitOutput(cfg, o){
+  if(o && o.output==="provider") return yamlDump({ proxies:cfg.proxies });
+  return yamlDump(cfg);
+}
+/* ===== DOM glue ===== */
+
 const $ = i => document.getElementById(i);
-let OUT = "", FNAME = "config-clash.yaml";
+let OUT="", FNAME="config-clash.yaml";
 
-const D = {
-  dev:{ hp:"Controller 127.0.0.1:9090, allow-lan mati. Untuk CMFA, FlClash, atau Clash Verge di HP.",
-        router:"Controller 0.0.0.0:9090, allow-lan nyala. Untuk Mihomo core di router/PC." },
-  grp:{ "1":"Tanpa grup tambahan selain lima grup utama.", "2":"Akun juga dibagi dua grup auto.",
-        "3":"Akun juga dibagi tiga: Primary, Backup, Tertiary.", "4":"Akun juga dibagi empat grup auto." },
-  spd:{ fast:"Cepat pindah kalau server mati. Baterai boros.", mid:"Seimbang untuk akun sedikit.",
-        slow:"Hemat baterai, tetap responsif pindah server. Cocok untuk akun banyak." },
-  quic:{ video:"YouTube, TikTok, dan Instagram dipaksa lewat tunnel supaya kuota utama tidak terpakai. Aplikasi lain tetap bebas.",
-         all:"Semua aplikasi dipaksa turun ke TCP dan lewat tunnel. Paling hemat kuota utama, tapi video call aplikasi lain bisa melambat.",
-         off:"Tidak ada yang dipaksa. Trafik UDP bisa lolos keluar tunnel, jadi kuota utama ikut terpakai." },
-  flag:{ "":"Akun yang lokasinya tak terbaca dibiarkan polos.", "🇸🇬":"Akun yang tak terbaca dianggap Singapura.",
-         "🇮🇩":"Akun yang tak terbaca dianggap Indonesia." },
-  adb:{ on:"Iklan diblokir (GEOSITE ads → REJECT). Bisa dimatikan per situs lewat grup AdBlock.", off:"Tidak ada iklan yang diblokir." },
-  lb:{ on:"Akun juga disebar ke Primary, Backup, Tertiary.", off:"Hanya lima grup utama yang dibuat." },
-  split:{ on:"Tiap protokol (VLESS TLS/NTLS, VMess, Trojan, SS, Hysteria2, TUIC) punya grup auto sendiri.", off:"Semua protokol dicampur." },
-  wa:{ on:"WhatsApp keluar dari tunnel, chat dan telepon lancar.", off:"WhatsApp ikut tunnel seperti aplikasi lain." },
-  ins:{ on:"Sambungan jalan walau sertifikat tak cocok. Pilih ini kalau ragu.",
-        off:"Sertifikat diperiksa ketat. Kalau akun gagal connect, centang lagi." }
+const D={
+  dev:{ hp:"Controller 127.0.0.1:9090, allow-lan mati.", router:"Controller 0.0.0.0:9090, allow-lan nyala." },
+  ruleset:{ minimal:"Aturan ringkas (lokal .id, IP privat, QUIC).", full:"Tambah geosite: iklan, privat, lokal/bank/gov ID, STUN, GEOIP ID direct (unduh database sekali)." },
+  output:{ config:"Config Clash siap pakai.", provider:"Hanya blok proxies, untuk digabung ke config sendiri." },
+  grp:{ "1":"Tanpa grup tambahan.", "2":"Akun dibagi dua grup.", "3":"Primary/Backup/Tertiary.", "4":"Dibagi empat grup." },
+  spd:{ fast:"Cepat pindah; boros baterai.", mid:"Seimbang.", slow:"Hemat baterai, cocok banyak akun." },
+  quic:{ video:"Video (YouTube/TikTok/IG) dipaksa lewat tunnel; lainnya bebas.", all:"Semua UDP 443 ditutup; paling hemat kuota.", off:"Tidak diblokir." },
+  flag:{ "":"Dibiarkan polos.", "\u{1F1F8}\u{1F1EC}":"Dianggap Singapura.", "\u{1F1EE}\u{1F1E9}":"Dianggap Indonesia." },
+  adb:{ on:"Iklan diblokir; bisa dimatikan per situs.", off:"Tidak memblokir iklan." },
+  lb:{ on:"Disebar ke Primary/Backup/Tertiary.", off:"Hanya lima grup utama." },
+  split:{ on:"Tiap protokol punya grup auto sendiri.", off:"Semua protokol dicampur." },
+  wa:{ on:"WhatsApp direct, chat & telepon lancar.", off:"WhatsApp ikut tunnel." },
+  ins:{ on:"Jalan walau sertifikat tak cocok.", off:"Sertifikat diperiksa ketat." }
 };
+function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
+  t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-function toast(m,bad){
-  const t=$("toast"); t.textContent=m;
-  t.style.borderColor = bad?"var(--bad)":"var(--gold)";
-  t.style.color = bad?"var(--bad)":"var(--gold-t)";
-  t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2300);
-}
-const SET_KEY="cassanova_clash_setting_v2";
-const SET_IDS=["dev","grp","spd","quic","flag"];
-const SET_CHK=["oAdb","oLb","oSplit","oWa","oIns"];
-function saveSet(){
-  try{ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked);
-    localStorage.setItem(SET_KEY, JSON.stringify(s)); }catch(e){}
-}
-function loadSet(){
-  try{ const s=JSON.parse(localStorage.getItem(SET_KEY)||"null"); if(!s) return;
-    SET_IDS.forEach(i=>{ if(s[i]!=null) $(i).value=s[i]; });
-    SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean") $(i).checked=s[i]; }); }catch(e){}
-}
+const SET_IDS=["dev","ruleset","output","spd","grp","flag","quic","fpSel","tunstack","testurl","lbstrat","port","secret"];
+const SET_CHK=["oAdb","oLb","oSplit","oWa","oIns","oIpv6"];
+function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
+function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null) $(i).value=s[i]; });
+  SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean") $(i).checked=s[i]; }); }
+const LAST="cassanova_clash_v3_last", PROF="cassanova_clash_v3_profiles";
+function saveLast(){ try{ localStorage.setItem(LAST, JSON.stringify(settings())); }catch(e){} }
+function loadLast(){ try{ applySettings(JSON.parse(localStorage.getItem(LAST)||"null")); }catch(e){} }
+function getProfiles(){ try{ return JSON.parse(localStorage.getItem(PROF)||"{}"); }catch(e){ return {}; } }
+function setProfiles(p){ try{ localStorage.setItem(PROF, JSON.stringify(p)); }catch(e){} }
+function refreshProfiles(sel){ const p=getProfiles(); const el=$("profSel");
+  el.innerHTML='<option value="">— pilih profil —</option>'+Object.keys(p).map(n=>'<option>'+n.replace(/</g,"&lt;")+'</option>').join("");
+  if(sel) el.value=sel; }
+
 function sync(){
-  $("dDev").textContent = D.dev[$("dev").value];
-  $("dGrp").textContent = D.grp[$("grp").value];
-  $("dSpd").textContent = D.spd[$("spd").value];
-  $("dQuic").textContent = D.quic[$("quic").value];
-  $("dFlag").textContent = D.flag[$("flag").value];
-  $("dAdb").textContent = $("oAdb").checked ? D.adb.on : D.adb.off;
-  $("dLb").textContent = $("oLb").checked ? D.lb.on : D.lb.off;
-  $("dSplit").textContent = $("oSplit").checked ? D.split.on : D.split.off;
-  $("dWa").textContent = $("oWa").checked ? D.wa.on : D.wa.off;
-  $("dIns").textContent = $("oIns").checked ? D.ins.on : D.ins.off;
+  $("dDev").textContent=D.dev[$("dev").value]; $("dRuleset").textContent=D.ruleset[$("ruleset").value];
+  $("dOutput").textContent=D.output[$("output").value]; $("dGrp").textContent=D.grp[$("grp").value];
+  $("dSpd").textContent=D.spd[$("spd").value]; $("dQuic").textContent=D.quic[$("quic").value];
+  $("dFlag").textContent=D.flag[$("flag").value];
+  $("dAdb").textContent=$("oAdb").checked?D.adb.on:D.adb.off;
+  $("dLb").textContent=$("oLb").checked?D.lb.on:D.lb.off;
+  $("dSplit").textContent=$("oSplit").checked?D.split.on:D.split.off;
+  $("dWa").textContent=$("oWa").checked?D.wa.on:D.wa.off;
+  $("dIns").textContent=$("oIns").checked?D.ins.on:D.ins.off;
   $("wQuic").classList.toggle("on", $("quic").value==="all" && !$("oWa").checked);
-  saveSet();
+  saveLast();
 }
-["dev","grp","spd","quic","flag","oAdb","oLb","oSplit","oWa","oIns"].forEach(id=>{
-  $(id).addEventListener("change", sync); $(id).addEventListener("input", sync);
-});
+SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); e.addEventListener("change",sync); e.addEventListener("input",sync); });
 
 let ACCS=[], ROWS=[];
-function readOpt(){
-  return { dev:$("dev").value, grp:parseInt($("grp").value,10), spd:$("spd").value,
-    quic:$("quic").value, flag:$("flag").value,
-    adblock:$("oAdb").checked, lb:$("oLb").checked, split:$("oSplit").checked, wa:$("oWa").checked, ins:$("oIns").checked };
-}
-function fileName(o){ return "config-clash-"+(o.dev==="router"?"router":"hp")+".yaml"; }
-function countStat(list){
-  const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0}; list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; });
-  $("sAll").textContent=list.length; $("sV").textContent=c.vless; $("sM").textContent=c.vmess;
-  $("sT").textContent=c.trojan; $("sSS").textContent=c.ss; $("sHY").textContent=c.hysteria2; $("sTU").textContent=c.tuic;
-}
+function readOpt(){ const s=settings();
+  return { dev:s.dev, ruleset:s.ruleset, output:s.output, spd:s.spd, grp:parseInt(s.grp,10), flag:s.flag, quic:s.quic,
+    adblock:s.oAdb, lb:s.oLb, split:s.oSplit, wa:s.oWa, ins:s.oIns,
+    fp:s.fpSel, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret, testurl:s.testurl, lbstrategy:s.lbstrat, tunstack:s.tunstack }; }
+function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
+
+function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0};
+  let other=0; list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
+  $("sAll").textContent=list.length; $("sV").textContent=c.vless; $("sM").textContent=c.vmess; $("sT").textContent=c.trojan;
+  $("sSS").textContent=c.ss; $("sHY").textContent=c.hysteria2; $("sTU").textContent=c.tuic; $("sOT").textContent=other; }
+
+function iconBtn(cls,title,path){ const b=document.createElement("button"); b.className="rbtn"; b.title=title;
+  b.innerHTML='<svg viewBox="0 0 24 24">'+path+'</svg>'; return b; }
 function renderRows(){
   const box=$("rows"); box.innerHTML="";
-  ROWS.forEach(r=>{
+  ROWS.forEach((r,i)=>{
     const row=document.createElement("div"); row.className="arow"+(r.on?"":" off");
     const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=r.on;
     cb.onchange=()=>{ r.on=cb.checked; row.className="arow"+(r.on?"":" off"); };
-    const tx=document.createElement("input"); tx.type="text"; tx.value=r.tag;
-    tx.oninput=()=>{ r.tag=tx.value; };
-    row.appendChild(cb); row.appendChild(tx); box.appendChild(row);
+    const tx=document.createElement("input"); tx.type="text"; tx.value=r.tag; tx.oninput=()=>{ r.tag=tx.value; };
+    const btns=document.createElement("div"); btns.className="rowbtns";
+    const qrB=iconBtn("qr","QR",'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7h-7"/>');
+    qrB.onclick=()=>showQR(r);
+    const cpB=iconBtn("cp","Salin link",'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>');
+    cpB.onclick=()=>copyLink(r);
+    const upB=iconBtn("up","Naik",'<path d="M12 19V5M5 12l7-7 7 7"/>'); upB.onclick=()=>move(i,-1);
+    const dnB=iconBtn("dn","Turun",'<path d="M12 5v14M5 12l7 7 7-7"/>'); dnB.onclick=()=>move(i,1);
+    btns.append(qrB,cpB,upB,dnB);
+    row.append(cb,tx,btns); box.appendChild(row);
   });
   $("list").classList.toggle("on", ROWS.length>0);
 }
-function regen(){
-  if(!ACCS.length) return toast("Belum ada akun",true);
+function move(i,d){ const j=i+d; if(j<0||j>=ROWS.length) return; const t=ROWS[i]; ROWS[i]=ROWS[j]; ROWS[j]=t;
+  const a=ACCS[i]; ACCS[i]=ACCS[j]; ACCS[j]=a; renderRows(); }
+function copyLink(r){ if(!r.raw) return toast("Node dari YAML — tanpa link URI",true);
+  (navigator.clipboard?navigator.clipboard.writeText(r.raw):Promise.reject())
+    .then(()=>toast("Link disalin")).catch(()=>{ const t=document.createElement("textarea"); t.value=r.raw; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); toast("Link disalin"); }); }
+function qrSvg(text){ const q=QR.encode(text), n=q.size, pad=4, dim=n+pad*2; let rc="";
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(q.matrix[r][c]) rc+='<rect x="'+(c+pad)+'" y="'+(r+pad)+'" width="1" height="1"/>';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+dim+' '+dim+'" shape-rendering="crispEdges"><rect width="'+dim+'" height="'+dim+'" fill="#fff"/><g fill="#000">'+rc+'</g></svg>'; }
+function showQR(r){ if(!r.raw) return toast("Node dari YAML — tanpa link URI",true);
+  try{ $("qrImg").innerHTML=qrSvg(r.raw); }catch(e){ return toast("Link terlalu panjang untuk QR",true); }
+  $("qrName").textContent=r.tag; $("qrRaw").textContent=r.raw; $("qrOverlay").classList.add("on"); }
+$("qrClose").onclick=()=>$("qrOverlay").classList.remove("on");
+$("qrOverlay").onclick=e=>{ if(e.target===$("qrOverlay")) $("qrOverlay").classList.remove("on"); };
+
+function stripFlag(s){ return s.replace(/^\s*[\u{1F1E6}-\u{1F1FF}]{2}\s*/u,""); }
+$("btnBulkFlag").onclick=()=>{ const v=$("flagBulk").value; if(!v) return;
+  ROWS.forEach(r=>{ const base=stripFlag(r.tag.replace(/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)/i,m=>m));
+    // insert flag after the KIND-NN prefix if present
+    const mm=/^((?:TLS|NTLS|VMESS|TRJ|SSR|SS|HY2|HY1|TUIC|ATLS|SOCKS|OTH)-\d+\s*)?(.*)$/u.exec(r.tag);
+    const prefix=mm[1]||""; let rest=stripFlag(mm[2]||"");
+    r.tag = prefix + (v==="__none__"?"":v+" ") + rest; });
+  renderRows(); toast("Bendera diterapkan"); };
+
+function regen(){ if(!ACCS.length) return toast("Belum ada akun",true);
   const o=readOpt(), keep=[], names=[];
   ROWS.forEach((r,i)=>{ if(r.on){ keep.push(ACCS[i]); names.push(r.tag.trim()||null); } });
   if(!keep.length) return toast("Semua akun dimatikan",true);
-  OUT=yamlDump(build(keep,o,names)); FNAME=fileName(o);
-  countStat(keep); $("out").className=""; $("out").textContent=OUT;
-  toast("Config dibuat ulang — "+keep.length+" akun");
-}
+  OUT=emitOutput(build(keep,o,names),o); FNAME=fileName(o);
+  countStat(keep); $("out").className=""; $("out").textContent=OUT; toast("Config dibuat ulang — "+keep.length+" akun"); }
+
 function run(){
-  const lines=expand($("uri").value);
-  if(!lines.length) return toast("Belum ada link yang ditempel",true);
-  const o=readOpt();
-  const accs=[], seen={}, notes=[]; let dup=0;
-  lines.forEach((l,i)=>{
-    try{ const a=parseOne(l), f=fp(a); if(seen[f]){ dup++; return; } seen[f]=1; accs.push(a); }
-    catch(e){ notes.push('<div class="bad">Baris '+(i+1)+" dilewati — "+e.message+"</div>"); }
-  });
-  if(!accs.length){
-    $("log").innerHTML=notes.join("")||'<div class="bad">Tidak ada link yang valid.</div>';
-    return toast("Tidak ada akun valid",true);
+  const o=readOpt(); const ex=expand($("uri").value);
+  const accs=[], raws=[], seen={}, notes=[]; let dup=0;
+  if(ex.clash){
+    let ing=[]; try{ ing=ingestClash(ex.text); }catch(e){ ing=[]; }
+    if(!ing.length) return toast("Config Clash tak terbaca",true);
+    ing.forEach(a=>{ const f=fp(a); if(seen[f]){dup++;return;} seen[f]=1; accs.push(a); raws.push(null); });
+    notes.push('<div class="ok">'+accs.length+" node dari config Clash YAML.</div>");
+  } else {
+    if(!ex.lines.length) return toast("Belum ada link",true);
+    ex.lines.forEach((l,i)=>{ try{ const a=parseOne(l), f=fp(a); if(seen[f]){dup++;return;} seen[f]=1; accs.push(a); raws.push(l.trim()); }
+      catch(e){ notes.push('<div class="bad">Baris '+(i+1)+" dilewati — "+e.message+"</div>"); } });
   }
-  OUT=yamlDump(build(accs,o)); FNAME=fileName(o);
-  ACCS=accs; ROWS=build.tags.map(t=>({tag:t, on:true}));
+  if(!accs.length){ $("log").innerHTML=notes.join("")||'<div class="bad">Tidak ada akun valid.</div>'; return toast("Tidak ada akun valid",true); }
+  OUT=emitOutput(build(accs,o),o); FNAME=fileName(o);
+  ACCS=accs; ROWS=build.tags.map((t,i)=>({tag:t,on:true,raw:raws[i]}));
   renderRows(); countStat(accs);
   $("out").className=""; $("out").textContent=OUT;
   notes.unshift('<div class="ok">'+accs.length+" akun dipakai"+(dup?", "+dup+" duplikat dibuang":"")+".</div>");
-  $("log").innerHTML=notes.join("");
-  toast("Config siap — "+accs.length+" akun");
+  $("log").innerHTML=notes.join(""); toast("Config siap — "+accs.length+" akun");
 }
 
-$("btnRegen").onclick=regen;
-$("btnGo").onclick=run;
-$("btnPaste").onclick=async()=>{
-  try{
-    const t=await navigator.clipboard.readText(); if(!t) throw 0;
-    const cur=$("uri").value.trim(); $("uri").value = cur ? cur+"\n"+t.trim() : t.trim();
-    toast("Link ditempel");
-  }catch(e){ $("uri").focus(); toast("Tempel manual lewat menu keyboard",true); }
-};
-$("btnClear").onclick=()=>{
-  $("uri").value=""; OUT=""; ACCS=[]; ROWS=[]; renderRows();
-  ["sAll","sV","sM","sT","sSS","sHY","sTU"].forEach(i=>$(i).textContent="0");
-  $("log").innerHTML=""; $("out").className="empty";
-  $("out").textContent="Tempel link akun di atas, lalu tekan tombol emas."; $("uri").focus();
-};
-$("btnCopy").onclick=async()=>{
-  if(!OUT) return toast("Belum ada config",true);
-  try{ await navigator.clipboard.writeText(OUT); }
-  catch(e){ const t=document.createElement("textarea"); t.value=OUT; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
-  toast("YAML tersalin");
-};
-$("btnDl").onclick=()=>{
-  if(!OUT) return toast("Belum ada config",true);
-  const u=URL.createObjectURL(new Blob([OUT],{type:"text/yaml"}));
-  const a=document.createElement("a"); a.href=u; a.download=FNAME; a.click();
-  URL.revokeObjectURL(u); toast("Tersimpan: "+FNAME);
-};
-loadSet(); sync();
+$("btnRegen").onclick=regen; $("btnGo").onclick=run;
+$("btnPaste").onclick=async()=>{ try{ const t=await navigator.clipboard.readText(); if(!t) throw 0;
+  const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+t.trim():t.trim(); toast("Ditempel"); }
+  catch(e){ $("uri").focus(); toast("Tempel manual",true); } };
+$("btnClear").onclick=()=>{ $("uri").value=""; OUT=""; ACCS=[]; ROWS=[]; renderRows();
+  ["sAll","sV","sM","sT","sSS","sHY","sTU","sOT"].forEach(i=>$(i).textContent="0");
+  $("log").innerHTML=""; $("out").className="empty"; $("out").textContent="Tempel link akun di atas, lalu tekan tombol emas."; $("uri").focus(); };
+$("btnCopy").onclick=async()=>{ if(!OUT) return toast("Belum ada config",true);
+  try{ await navigator.clipboard.writeText(OUT); }catch(e){ const t=document.createElement("textarea"); t.value=OUT; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  toast("Tersalin"); };
+$("btnDl").onclick=()=>{ if(!OUT) return toast("Belum ada config",true);
+  const u=URL.createObjectURL(new Blob([OUT],{type:"text/yaml"})); const a=document.createElement("a"); a.href=u; a.download=FNAME; a.click(); URL.revokeObjectURL(u); toast("Tersimpan: "+FNAME); };
+
+const CORS=["https://corsproxy.io/?url=","https://api.allorigins.win/raw?url=","https://thingproxy.freeboard.io/fetch/"];
+$("btnUrl").onclick=async()=>{ const url=$("subUrl").value.trim(); if(!/^https?:\/\//i.test(url)) return toast("URL tidak valid",true);
+  toast("Mengambil…"); let text="";
+  try{ const r=await fetch(url); if(r.ok) text=await r.text(); }catch(e){}
+  if(!text){ for(const p of CORS){ try{ const r=await fetch(p+encodeURIComponent(url)); if(r.ok){ text=await r.text(); if(text) break; } }catch(e){} } }
+  if(!text) return toast("Gagal mengambil (CORS). Salin manual isinya.",true);
+  const cur=$("uri").value.trim(); $("uri").value=cur?cur+"\n"+text.trim():text.trim(); toast("Subscription diambil"); };
+
+$("profSave").onclick=()=>{ const name=(prompt("Nama profil:")||"").trim(); if(!name) return;
+  const p=getProfiles(); p[name]=settings(); setProfiles(p); refreshProfiles(name); toast("Profil disimpan: "+name); };
+$("profDel").onclick=()=>{ const name=$("profSel").value; if(!name) return toast("Pilih profil dulu",true);
+  const p=getProfiles(); delete p[name]; setProfiles(p); refreshProfiles(""); toast("Profil dihapus"); };
+$("profSel").onchange=()=>{ const name=$("profSel").value; if(!name) return; const p=getProfiles();
+  if(p[name]){ applySettings(p[name]); sync(); toast("Profil dimuat: "+name); } };
+
+if("serviceWorker" in navigator){ try{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }catch(e){} }
+
+loadLast(); refreshProfiles(); sync();
+
 </script>
 </body>
 </html>
