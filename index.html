@@ -336,6 +336,9 @@
     <div class="fld"><div class="lbl" data-i18n="lGames">Game</div>
       <div class="sel-wrap"><select id="games"><option value="proxy" selected>Lewat tunnel</option><option value="direct">Direct</option><option value="off">Default</option></select></div><p class="desc" id="dGames"></p></div>
   </div>
+  <div class="fld"><div class="lbl" data-i18n="lFinance">Bank & e-wallet</div>
+    <div class="sel-wrap"><select id="finance"><option value="tunnel" selected>Lewat tunnel</option><option value="direct">Direct (disarankan)</option></select></div><p class="desc" id="dFinance"></p></div>
+
   <div class="fld"><div class="lbl" data-i18n="lQuic">Blokir QUIC</div>
     <div class="sel-wrap"><select id="quic"><option value="video" selected>Hanya video</option><option value="all">Semua UDP 443</option><option value="off">Tidak</option></select></div>
     <p class="desc" id="dQuic"></p></div>
@@ -1107,8 +1110,10 @@ const KIND={ TLS:"🔒 Auto VLESS TLS", NTLS:"🔓 Auto VLESS NTLS", VMESS:"🛡
 const KORDER=["TLS","NTLS","VMESS","TRJ","SS","SSR","HY2","HY1","TUIC","ATLS","SOCKS","OTH"];
 const QDOM=["googlevideo.com","youtube.com","youtu.be","ytimg.com","tiktokcdn.com","tiktokv.com",
   "tiktok.com","facebook.com","fbcdn.net","instagram.com","cdninstagram.com"];
-const LOCAL_ID=["go.id","mil.id","ac.id","bca.co.id","klikbca.com","bri.co.id","bankmandiri.co.id","bni.co.id",
+const GOVEDU=["go.id","mil.id","ac.id"];
+const FINANCE=["bca.co.id","klikbca.com","bri.co.id","bankmandiri.co.id","bni.co.id",
   "dana.id","gopay.co.id","gojek.com","ovo.id","shopee.co.id","tokopedia.com","blibli.com","linkaja.id","jenius.com"];
+const LOCAL_ID=GOVEDU.concat(FINANCE);
 const TESTURL={ gstatic:"http://www.gstatic.com/generate_204", cloudflare:"https://cp.cloudflare.com/generate_204",
   apple:"http://captive.apple.com/generate_204" };
 const DEV={ hp:{ ctrl:"127.0.0.1:9090", lan:false, bind:"*" }, router:{ ctrl:"0.0.0.0:9090", lan:true, bind:"*" } };
@@ -1200,9 +1205,12 @@ function build(accs, o, override){
   ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","127.0.0.0/8","100.64.0.0/10"].forEach(c=>rules.push("IP-CIDR,"+c+",DIRECT,no-resolve"));
   rules.push("IP-CIDR6,fc00::/7,DIRECT,no-resolve");
   rules.push("IP-CIDR6,::1/128,DIRECT,no-resolve");
+  // Bank & e-wallet: paksa lewat tunnel (harus di atas DOMAIN-SUFFIX,id & GEOIP,ID)
+  if(o.finance==="tunnel") FINANCE.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+","+G.PROXY));
   if(ruleFull){
     rules.push("GEOSITE,private,DIRECT");
-    LOCAL_ID.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
+    GOVEDU.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
+    if(o.finance!=="tunnel") FINANCE.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
     rules.push("DOMAIN-KEYWORD,stun,DIRECT");
   }
   rules.push("DOMAIN-SUFFIX,id,DIRECT");
@@ -1363,7 +1371,7 @@ const T={
   lDev:{id:"Perangkat tujuan",en:"Target device"}, lRuleset:{id:"Profil aturan",en:"Rule profile"},
   lOutput:{id:"Keluaran",en:"Output"}, lSpd:{id:"Kecepatan cek server",en:"Health-check speed"},
   lGrp:{id:"Jumlah grup auto",en:"Auto group count"}, lFlag:{id:"Bendera bawaan",en:"Default flag"},
-  lQuic:{id:"Blokir QUIC",en:"Block QUIC"}, lPorn:{id:"Konten porno",en:"Porn content"}, lGames:{id:"Game",en:"Games"},
+  lQuic:{id:"Blokir QUIC",en:"Block QUIC"}, lPorn:{id:"Konten porno",en:"Porn content"}, lGames:{id:"Game",en:"Games"}, lFinance:{id:"Bank & e-wallet",en:"Banks & e-wallets"},
   cAdb:{id:"Blokir iklan (AdBlock)",en:"Block ads (AdBlock)"}, cRegion:{id:"Grup per region",en:"Per-region groups"},
   cStream:{id:"Grup streaming (unlock)",en:"Streaming group (unlock)"}, cLb:{id:"Bagi akun ke beberapa grup",en:"Split accounts into groups"},
   cSplit:{id:"Pisahkan grup per protokol",en:"Separate groups per protocol"},
@@ -1409,6 +1417,7 @@ const D={
     quic:{video:"QUIC = jalur UDP port 443 yang dipakai YouTube/TikTok/Instagram dan sering lolos keluar tunnel (boros kuota utama). Mode ini memaksa khusus domain video turun ke TCP agar tetap lewat tunnel; aplikasi lain & video call tidak diganggu. Disarankan.",all:"Menutup SEMUA UDP port 443. Semua aplikasi dipaksa turun ke TCP lewat tunnel — paling hemat kuota utama, tapi sebagian video call/game berbasis QUIC bisa melambat.",off:"QUIC/UDP 443 dibiarkan apa adanya — bisa lolos keluar tunnel, jadi sebagian trafik memakai kuota utama (bukan kuota tunnel)."},
     flag:{"":"Bendera dideteksi otomatis dari nama/host. Pilihan ini hanya untuk node yang tak terdeteksi (dibiarkan polos).","\u{1F1F8}\u{1F1EC}":"Node tak terdeteksi dianggap Singapura.","\u{1F1EE}\u{1F1E9}":"Node tak terdeteksi dianggap Indonesia."},
     porn:{off:"Dibiarkan.",reject:"Diblokir (geosite porn → REJECT)."}, games:{proxy:"Lewat tunnel.",direct:"Langsung tanpa tunnel.",off:"Ikut aturan umum."},
+    finance:{tunnel:"Bank & e-wallet dipaksa lewat tunnel. Catatan: sebagian bank bisa menolak IP asing (login/OTP gagal).",direct:"Bank & e-wallet langsung tanpa tunnel — paling aman & kompatibel (disarankan)."},
     adb:{on:"Blokir iklan aktif.",off:"Blokir iklan nonaktif."},
     fp:{chrome:"Sidik jari TLS Chrome — paling umum & aman.",firefox:"Menyerupai Firefox.",safari:"Menyerupai Safari.",ios:"Menyerupai iOS.",randomized:"Acak tiap koneksi.","":"Tanpa penyamaran (lebih mudah terdeteksi)."},
     tun:{mixed:"TCP via sistem + UDP via gvisor — seimbang.",gvisor:"Stack virtual — kompatibel, agak berat.",system:"Stack OS — tercepat, perlu dukungan OS."},
@@ -1432,6 +1441,7 @@ const D={
     quic:{video:"QUIC = UDP port 443 used by YouTube/TikTok/Instagram that often escapes the tunnel (burns main quota). This forces video domains down to TCP so they stay in the tunnel; other apps & video calls are untouched. Recommended.",all:"Blocks ALL UDP port 443. Every app is forced to TCP through the tunnel — most quota-saving, but some QUIC-based video calls/games may slow down.",off:"QUIC/UDP 443 left as-is — can escape the tunnel, so some traffic uses your main quota instead of the tunnel quota."},
     flag:{"":"Flags are auto-detected from name/host. This only applies to undetected nodes (left plain).","\u{1F1F8}\u{1F1EC}":"Undetected nodes treated as Singapore.","\u{1F1EE}\u{1F1E9}":"Undetected nodes treated as Indonesia."},
     porn:{off:"Allowed.",reject:"Blocked (geosite porn → REJECT)."}, games:{proxy:"Through tunnel.",direct:"Direct, no tunnel.",off:"Follows general rules."},
+    finance:{tunnel:"Banks & e-wallets forced through tunnel. Note: some banks reject foreign IPs (login/OTP may fail).",direct:"Banks & e-wallets go direct — safest & most compatible (recommended)."},
     adb:{on:"Ad blocking on.",off:"Ad blocking off."},
     fp:{chrome:"Chrome TLS fingerprint — most common & safe.",firefox:"Mimics Firefox.",safari:"Mimics Safari.",ios:"Mimics iOS.",randomized:"Randomized per connection.","":"No masking (easier to detect)."},
     tun:{mixed:"TCP via system + UDP via gvisor — balanced.",gvisor:"Virtual stack — compatible, a bit heavier.",system:"OS stack — fastest, needs OS support."},
@@ -1459,8 +1469,8 @@ function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch
 function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-const SET_IDS=["dev","ruleset","spd","flag","quic","porn","games","tunstack","testurl","dnsProvider","dnsCustom","adblockSrc","ispDns","geoMirror","port","secret"];
-const DEFAULTS={dev:"hp",ruleset:"full",spd:"slow",flag:"",quic:"video",porn:"off",games:"proxy",tunstack:"mixed",testurl:"gstatic",dnsProvider:"cloudflare",dnsCustom:"",adblockSrc:"semua",ispDns:"",geoMirror:"ghproxy",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:false,oSplit:false,oTelegram:false,oIns:false,oIpv6:false,oDnsFallback:false,oGeo:false};
+const SET_IDS=["dev","ruleset","spd","flag","quic","porn","games","finance","tunstack","testurl","dnsProvider","dnsCustom","adblockSrc","ispDns","geoMirror","port","secret"];
+const DEFAULTS={dev:"hp",ruleset:"full",spd:"slow",flag:"",quic:"video",porn:"off",games:"proxy",finance:"tunnel",tunstack:"mixed",testurl:"gstatic",dnsProvider:"cloudflare",dnsCustom:"",adblockSrc:"semua",ispDns:"",geoMirror:"ghproxy",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:false,oSplit:false,oTelegram:false,oIns:false,oIpv6:false,oDnsFallback:false,oGeo:false};
 const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oTelegram","oIns","oIpv6","oDnsFallback","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
@@ -1472,6 +1482,7 @@ function sync(){ const g=D[LANG];
   $("dDev").textContent=g.dev[$("dev").value]; $("dRuleset").textContent=g.ruleset[$("ruleset").value];
   $("dSpd").textContent=g.spd[$("spd").value]; $("dQuic").textContent=g.quic[$("quic").value];
   $("dFlag").textContent=g.flag[$("flag").value]; $("dPorn").textContent=g.porn[$("porn").value]; $("dGames").textContent=g.games[$("games").value];
+  $("dFinance").textContent=g.finance[$("finance").value];
   $("dAdb").textContent=$("oAdb").checked?g.adb.on:g.adb.off; $("dRegion").textContent=$("oRegion").checked?g.region.on:g.region.off;
   $("dStream").textContent=$("oStream").checked?g.stream.on:g.stream.off;
   $("dLb").textContent=$("oLb").checked?g.lb.on:g.lb.off; $("dSplit").textContent=$("oSplit").checked?g.split.on:g.split.off;
@@ -1490,7 +1501,7 @@ SET_IDS.concat(SET_CHK).forEach(id=>{ const e=$(id); if(e){ e.addEventListener("
 let ACCS=[], ROWS=[];
 function readOpt(){ const s=settings();
   return { dev:s.dev, ruleset:s.ruleset, spd:s.spd, grp:3, flag:s.flag, quic:s.quic,
-    adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games,
+    adblock:s.oAdb, region:s.oRegion, streaming:s.oStream, catPorn:s.porn, catGames:s.games, finance:s.finance,
     lb:s.oLb, split:s.oSplit, ins:s.oIns, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
     testurl:s.testurl, tunstack:s.tunstack,
     dnsProvider:s.dnsProvider, dnsCustom:s.dnsCustom, geoUpdate:s.oGeo,
