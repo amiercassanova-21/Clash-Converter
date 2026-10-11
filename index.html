@@ -379,6 +379,9 @@
         <label class="chk" style="margin-top:0"><input type="checkbox" id="oDnsFallback"><span class="box">✓</span><span><b data-i18n="cDnsFb">DNS anti-poisoning</b><span class="desc" data-i18n="hDnsFb">Fallback + filter GeoIP CN untuk hasil DNS yang diracuni.</span></span></label>
       </div>
     </div>
+    <div class="fld"><div class="lbl" data-i18n="lDirect">Domain DIRECT tambahan</div>
+      <textarea id="directDomains" spellcheck="false" style="min-height:52px" placeholder="satu domain per baris / pisah koma&#10;mis. myxl.xlaxiata.co.id, vidio.com"></textarea>
+      <p class="desc" data-i18n="hDirect">Domain ini dipaksa langsung (tanpa tunnel) + dapat IP asli. App operator lokal (XL/Telkomsel/Indosat/Tri/Smartfren dll) sudah otomatis DIRECT.</p></div>
     <label class="chk"><input type="checkbox" id="oGeo"><span class="box">✓</span><span><b data-i18n="cGeo">Auto-update geo database</b><span class="desc" data-i18n="hGeo">Unduh ulang GeoIP/GeoSite tiap 24 jam (pakai sedikit kuota).</span></span></label>
     <label class="chk"><input type="checkbox" id="oIpv6"><span class="box">✓</span><span><b data-i18n="cIpv6">Aktifkan IPv6</b><span class="desc" data-i18n="hIpv6">Default mati agar tak bocor/lambat ke IPv6 lokal.</span></span></label>
   </details>
@@ -1111,6 +1114,11 @@ const KORDER=["TLS","NTLS","VMESS","TRJ","SS","SSR","HY2","HY1","TUIC","ATLS","S
 const QDOM=["googlevideo.com","youtube.com","youtu.be","ytimg.com","tiktokcdn.com","tiktokv.com",
   "tiktok.com","facebook.com","fbcdn.net","instagram.com","cdninstagram.com"];
 const GOVEDU=["go.id","mil.id","ac.id"];
+/* Aplikasi lokal / operator Indonesia yang sebaiknya DIRECT (akses sering geo-lock ke IP ID / jaringan operator) */
+const ISP_APPS=["xlaxiata.co.id","axis.co.id","axisnet.id","telkomsel.com","telkomsel.co.id","tsel.id","byu.id",
+  "indosat.com","indosatooredoo.com","im3.id","ioh.co.id","tri.co.id","3.co.id","smartfren.com","smartfren.co.id",
+  "biznetnetworks.com","firstmedia.com","myrepublic.co.id","iconpln.co.id","pln.co.id","peruri.co.id","kai.id",
+  "pos.co.id","bpjs-kesehatan.go.id","prakerja.go.id","grab.com"];
 const FINANCE=["bca.co.id","klikbca.com","bri.co.id","bankmandiri.co.id","bni.co.id",
   "dana.id","gopay.co.id","gojek.com","ovo.id","shopee.co.id","tokopedia.com","blibli.com","linkaja.id","jenius.com"];
 const LOCAL_ID=GOVEDU.concat(FINANCE);
@@ -1205,6 +1213,10 @@ function build(accs, o, override){
   ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","127.0.0.0/8","100.64.0.0/10"].forEach(c=>rules.push("IP-CIDR,"+c+",DIRECT,no-resolve"));
   rules.push("IP-CIDR6,fc00::/7,DIRECT,no-resolve");
   rules.push("IP-CIDR6,::1/128,DIRECT,no-resolve");
+  // Domain DIRECT tambahan (dari user) + aplikasi lokal/operator Indonesia — prioritas tinggi
+  const customDirect=String(o.directDomains||"").split(/[\s,]+/).map(s=>s.trim().replace(/^[*+]?\./,"")).filter(Boolean);
+  customDirect.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
+  ISP_APPS.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+",DIRECT"));
   // Bank & e-wallet: paksa lewat tunnel (harus di atas DOMAIN-SUFFIX,id & GEOIP,ID)
   if(o.finance==="tunnel") FINANCE.forEach(d=>rules.push("DOMAIN-SUFFIX,"+d+","+G.PROXY));
   if(ruleFull){
@@ -1262,6 +1274,8 @@ function build(accs, o, override){
     "proxy-server-nameserver":[remoteNS]
   };
   dns["nameserver-policy"]={ "geosite:private":"system", "+.id":["system"] };
+  // app lokal + domain custom → skip fake-ip (dapat IP asli, lebih kompatibel)
+  ISP_APPS.concat(customDirect).forEach(d=>{ const f="+."+d; if(!dns["fake-ip-filter"].includes(f)) dns["fake-ip-filter"].push(f); });
   if(o.dnsFallback){
     dns.fallback=["https://dns.google/dns-query","tls://8.8.4.4","1.0.0.1"];
     dns["fallback-filter"]={ geoip:true, "geoip-code":"CN", ipcidr:["240.0.0.0/4"] };
@@ -1379,6 +1393,8 @@ const T={
   lDnsCustom:{id:"Alamat DNS custom",en:"Custom DNS address"},
   lAdbSrc:{id:"Sumber AdBlock",en:"AdBlock source"}, lIsp:{id:"DNS ISP lokal",en:"Local ISP DNS"},
   lMirror:{id:"Mirror unduhan",en:"Download mirror"}, cTg:{id:"Telegram lancar",en:"Telegram optimize"}, cDnsFb:{id:"DNS anti-poisoning",en:"DNS anti-poisoning"},
+  lDirect:{id:"Domain DIRECT tambahan",en:"Extra DIRECT domains"},
+  hDirect:{id:"Domain ini dipaksa langsung (tanpa tunnel) + dapat IP asli. App operator lokal (XL/Telkomsel/Indosat/Tri/Smartfren dll) sudah otomatis DIRECT.",en:"These domains go direct (no tunnel) + get real IP. Local carrier apps (XL/Telkomsel/Indosat/Tri/Smartfren etc.) are already DIRECT automatically."},
   hDnsFb:{id:"Fallback + filter GeoIP CN untuk hasil DNS yang diracuni.",en:"Fallback + GeoIP CN filter for poisoned DNS answers."},
   hIsp:{id:"Opsional. DNS ISP untuk resolusi lokal lebih cepat.",en:"Optional. ISP DNS for faster local resolution."},
   hDnsCustom:{id:"Isi DNS Anda sendiri — DoH (https://), DoT (tls://), DoQ (quic://), atau IP biasa.",en:"Enter your own DNS — DoH (https://), DoT (tls://), DoQ (quic://), or a plain IP."},
@@ -1469,8 +1485,8 @@ function setLang(l){ LANG=l; try{localStorage.setItem("cassanova_lang",l);}catch
 function toast(m,bad){ const t=$("toast"); t.textContent=m; t.style.borderColor=bad?"var(--bad)":"var(--gold)";
   t.style.color=bad?"var(--bad)":"var(--gold-t)"; t.classList.add("on"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("on"),2500); }
 
-const SET_IDS=["dev","ruleset","spd","flag","quic","porn","games","finance","tunstack","testurl","dnsProvider","dnsCustom","adblockSrc","ispDns","geoMirror","port","secret"];
-const DEFAULTS={dev:"hp",ruleset:"full",spd:"slow",flag:"",quic:"video",porn:"off",games:"proxy",finance:"tunnel",tunstack:"mixed",testurl:"gstatic",dnsProvider:"cloudflare",dnsCustom:"",adblockSrc:"semua",ispDns:"",geoMirror:"ghproxy",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:false,oSplit:false,oTelegram:false,oIns:false,oIpv6:false,oDnsFallback:false,oGeo:false};
+const SET_IDS=["dev","ruleset","spd","flag","quic","porn","games","finance","tunstack","testurl","dnsProvider","dnsCustom","adblockSrc","ispDns","geoMirror","directDomains","port","secret"];
+const DEFAULTS={dev:"hp",ruleset:"full",spd:"slow",flag:"",quic:"video",porn:"off",games:"proxy",finance:"tunnel",tunstack:"mixed",testurl:"gstatic",dnsProvider:"cloudflare",dnsCustom:"",adblockSrc:"semua",ispDns:"",geoMirror:"ghproxy",directDomains:"",port:"7890",secret:"",oAdb:true,oRegion:false,oStream:false,oLb:false,oSplit:false,oTelegram:false,oIns:false,oIpv6:false,oDnsFallback:false,oGeo:false};
 const SET_CHK=["oAdb","oRegion","oStream","oLb","oSplit","oTelegram","oIns","oIpv6","oDnsFallback","oGeo"];
 function settings(){ const s={}; SET_IDS.forEach(i=>s[i]=$(i).value); SET_CHK.forEach(i=>s[i]=$(i).checked); return s; }
 function applySettings(s){ if(!s) return; SET_IDS.forEach(i=>{ if(s[i]!=null&&$(i)) $(i).value=s[i]; }); SET_CHK.forEach(i=>{ if(typeof s[i]==="boolean"&&$(i)) $(i).checked=s[i]; }); }
@@ -1505,7 +1521,7 @@ function readOpt(){ const s=settings();
     lb:s.oLb, split:s.oSplit, ins:s.oIns, ipv6:s.oIpv6, port:parseInt(s.port,10)||7890, secret:s.secret,
     testurl:s.testurl, tunstack:s.tunstack,
     dnsProvider:s.dnsProvider, dnsCustom:s.dnsCustom, geoUpdate:s.oGeo,
-    adblockSource:s.adblockSrc, ispDns:s.ispDns, geoMirror:s.geoMirror, telegram:s.oTelegram, dnsFallback:s.oDnsFallback }; }
+    adblockSource:s.adblockSrc, ispDns:s.ispDns, geoMirror:s.geoMirror, telegram:s.oTelegram, dnsFallback:s.oDnsFallback, directDomains:s.directDomains }; }
 function fileName(o){ const base="config-clash-"+(o.dev==="router"?"router":"hp"); return (o.output==="provider"?base+"-provider":base)+".yaml"; }
 function countStat(list){ const c={vless:0,vmess:0,trojan:0,ss:0,hysteria2:0,tuic:0}; let other=0;
   list.forEach(a=>{ if(c[a.proto]!=null) c[a.proto]++; else other++; });
